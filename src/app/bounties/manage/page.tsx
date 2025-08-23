@@ -1,10 +1,19 @@
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ArrowLeft, Award, Clock, Users, TrendingUp, User, CheckCircle, Plus } from "lucide-react"
-import Link from "next/link"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  ArrowLeft,
+  Award,
+  Clock,
+  Users,
+  TrendingUp,
+  User,
+  CheckCircle,
+  Plus,
+} from "lucide-react";
+import Link from "next/link";
 
 // Mock data for user's bounties
 const myBounties = [
@@ -24,7 +33,8 @@ const myBounties = [
         author: "Sarah Kim",
         avatar: "/placeholder.svg?key=sarah",
         votes: 8,
-        excerpt: "Great question! I've implemented LayerZero cross-chain transfers...",
+        excerpt:
+          "Great question! I've implemented LayerZero cross-chain transfers...",
         canAward: true,
       },
       {
@@ -32,7 +42,8 @@ const myBounties = [
         author: "Mike Rodriguez",
         avatar: "/placeholder.svg?key=mike",
         votes: 3,
-        excerpt: "I'd add to Sarah's excellent answer that you should also consider...",
+        excerpt:
+          "I'd add to Sarah's excellent answer that you should also consider...",
         canAward: true,
       },
     ],
@@ -50,7 +61,7 @@ const myBounties = [
     winner: "Sarah Kim",
     winnerAvatar: "/placeholder.svg?key=sarah",
   },
-]
+];
 
 const wonBounties = [
   {
@@ -69,12 +80,12 @@ const wonBounties = [
     awardedAt: "1 week ago",
     tags: ["chainlink", "oracles", "price-feeds"],
   },
-]
+];
 
 export default function ManageBountiesPage() {
-  const totalCreated = myBounties.length
-  const totalSpent = myBounties.reduce((sum, b) => sum + b.amount, 0)
-  const totalEarned = wonBounties.reduce((sum, b) => sum + b.amount, 0)
+  const totalCreated = myBounties.length;
+  const totalSpent = myBounties.reduce((sum, b) => sum + b.amount, 0);
+  const totalEarned = wonBounties.reduce((sum, b) => sum + b.amount, 0);
 
   return (
     <div className="min-h-screen bg-background">
@@ -84,14 +95,16 @@ export default function ManageBountiesPage() {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
               <Link href="/bounties">
-                <Button variant="ghost" size="sm">
+                <Button size="sm">
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back to Bounties
                 </Button>
               </Link>
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                  <span className="text-primary-foreground font-bold text-lg">C</span>
+                  <span className="text-primary-foreground font-bold text-lg">
+                    C
+                  </span>
                 </div>
                 <h1 className="text-xl font-bold text-foreground">BaseQuery</h1>
               </div>
@@ -103,8 +116,12 @@ export default function ManageBountiesPage() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Header */}
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-foreground mb-2">Manage Bounties</h2>
-          <p className="text-muted-foreground">Track your bounties, award winners, and manage your rewards.</p>
+          <h2 className="text-3xl font-bold text-foreground mb-2">
+            Manage Bounties
+          </h2>
+          <p className="text-muted-foreground">
+            Track your bounties, award winners, and manage your rewards.
+          </p>
         </div>
 
         {/* Stats Cards */}
@@ -116,8 +133,12 @@ export default function ManageBountiesPage() {
                   <Award className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-foreground">{totalCreated}</div>
-                  <div className="text-sm text-muted-foreground">Bounties Created</div>
+                  <div className="text-2xl font-bold text-foreground">
+                    {totalCreated}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Bounties Created
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -130,8 +151,12 @@ export default function ManageBountiesPage() {
                   <TrendingUp className="w-6 h-6 text-red-600" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-foreground">${totalSpent}</div>
-                  <div className="text-sm text-muted-foreground">Total Spent</div>
+                  <div className="text-2xl font-bold text-foreground">
+                    ${totalSpent}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Total Spent
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -144,8 +169,12 @@ export default function ManageBountiesPage() {
                   <CheckCircle className="w-6 h-6 text-green-600" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-foreground">${totalEarned}</div>
-                  <div className="text-sm text-muted-foreground">Total Earned</div>
+                  <div className="text-2xl font-bold text-foreground">
+                    ${totalEarned}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Total Earned
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -162,7 +191,9 @@ export default function ManageBountiesPage() {
           {/* My Bounties Tab */}
           <TabsContent value="created" className="space-y-6">
             <div className="flex justify-between items-center">
-              <h3 className="text-xl font-semibold text-foreground">Your Active Bounties</h3>
+              <h3 className="text-xl font-semibold text-foreground">
+                Your Active Bounties
+              </h3>
               <Link href="/ask">
                 <Button>
                   <Plus className="w-4 h-4 mr-2" />
@@ -178,7 +209,13 @@ export default function ManageBountiesPage() {
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
-                          <Badge className={bounty.status === "active" ? "bg-green-600" : "bg-blue-600"}>
+                          <Badge
+                            className={
+                              bounty.status === "active"
+                                ? "bg-green-600"
+                                : "bg-blue-600"
+                            }
+                          >
                             {bounty.status === "active" ? "Active" : "Awarded"}
                           </Badge>
                           {bounty.status === "active" && (
@@ -189,11 +226,13 @@ export default function ManageBountiesPage() {
                           )}
                         </div>
 
-                        <CardTitle className="text-lg mb-2">{bounty.title}</CardTitle>
+                        <CardTitle className="text-lg mb-2">
+                          {bounty.title}
+                        </CardTitle>
 
                         <div className="flex gap-2 mb-4">
                           {bounty.tags.map((tag) => (
-                            <Badge key={tag} variant="outline">
+                            <Badge key={tag} variant="secondary">
                               {tag}
                             </Badge>
                           ))}
@@ -210,7 +249,9 @@ export default function ManageBountiesPage() {
                       </div>
 
                       <div className="ml-6 text-right">
-                        <div className="text-2xl font-bold text-primary mb-1">${bounty.amount}</div>
+                        <div className="text-2xl font-bold text-primary mb-1">
+                          ${bounty.amount}
+                        </div>
                         {bounty.status === "awarded" && bounty.winner && (
                           <Badge variant="default" className="bg-green-600">
                             Awarded to {bounty.winner}
@@ -222,26 +263,42 @@ export default function ManageBountiesPage() {
 
                   {bounty.status === "active" && bounty.topAnswers && (
                     <CardContent>
-                      <h4 className="font-medium mb-4">Top Answers - Choose Winner</h4>
+                      <h4 className="font-medium mb-4">
+                        Top Answers - Choose Winner
+                      </h4>
                       <div className="space-y-4">
                         {bounty.topAnswers.map((answer) => (
-                          <div key={answer.id} className="border border-border rounded-lg p-4">
+                          <div
+                            key={answer.id}
+                            className="border border-border rounded-lg p-4"
+                          >
                             <div className="flex items-start justify-between">
                               <div className="flex-1">
                                 <div className="flex items-center gap-3 mb-2">
                                   <Avatar className="w-6 h-6">
-                                    <AvatarImage src={answer.avatar || "/placeholder.svg"} />
+                                    <AvatarImage
+                                      src={answer.avatar || "/placeholder.svg"}
+                                    />
                                     <AvatarFallback>
                                       <User className="w-3 h-3" />
                                     </AvatarFallback>
                                   </Avatar>
-                                  <span className="font-medium">{answer.author}</span>
-                                  <Badge variant="outline">{answer.votes} votes</Badge>
+                                  <span className="font-medium">
+                                    {answer.author}
+                                  </span>
+                                  <Badge variant="secondary">
+                                    {answer.votes} votes
+                                  </Badge>
                                 </div>
-                                <p className="text-sm text-muted-foreground mb-3">{answer.excerpt}</p>
+                                <p className="text-sm text-muted-foreground mb-3">
+                                  {answer.excerpt}
+                                </p>
                               </div>
                               <div className="ml-4">
-                                <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                                <Button
+                                  size="sm"
+                                  className="bg-green-600 hover:bg-green-700"
+                                >
                                   Award Bounty
                                 </Button>
                               </div>
@@ -257,7 +314,9 @@ export default function ManageBountiesPage() {
                       <div className="flex items-center gap-3 p-4 bg-green-50 rounded-lg">
                         <CheckCircle className="w-5 h-5 text-green-600" />
                         <div>
-                          <div className="font-medium text-green-800">Bounty Awarded</div>
+                          <div className="font-medium text-green-800">
+                            Bounty Awarded
+                          </div>
                           <div className="text-sm text-green-600">
                             ${bounty.amount} awarded to {bounty.winner}
                           </div>
@@ -272,7 +331,7 @@ export default function ManageBountiesPage() {
 
           {/* Bounties Won Tab */}
           <TabsContent value="won" className="space-y-6">
-            <h3 className="text-xl font-semibold text-foreground">Bounties You've Won</h3>
+            <h3 className="text-xl font-semibold text-foreground">{`Bounties You've Won`}</h3>
 
             <div className="space-y-4">
               {wonBounties.map((bounty) => (
@@ -280,23 +339,28 @@ export default function ManageBountiesPage() {
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <CardTitle className="text-lg mb-2">{bounty.title}</CardTitle>
+                        <CardTitle className="text-lg mb-2">
+                          {bounty.title}
+                        </CardTitle>
 
                         <div className="flex gap-2 mb-3">
                           {bounty.tags.map((tag) => (
-                            <Badge key={tag} variant="outline">
+                            <Badge key={tag} variant="secondary">
                               {tag}
                             </Badge>
                           ))}
                         </div>
 
                         <div className="text-sm text-muted-foreground">
-                          Question by {bounty.questionAuthor} • Awarded {bounty.awardedAt}
+                          Question by {bounty.questionAuthor} • Awarded{" "}
+                          {bounty.awardedAt}
                         </div>
                       </div>
 
                       <div className="ml-6 text-right">
-                        <div className="text-2xl font-bold text-green-600 mb-1">+${bounty.amount}</div>
+                        <div className="text-2xl font-bold text-green-600 mb-1">
+                          +${bounty.amount}
+                        </div>
                         <Badge variant="default" className="bg-green-600">
                           ✓ Won
                         </Badge>
@@ -310,5 +374,5 @@ export default function ManageBountiesPage() {
         </Tabs>
       </div>
     </div>
-  )
+  );
 }
