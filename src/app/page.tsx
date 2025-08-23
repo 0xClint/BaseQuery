@@ -1,103 +1,196 @@
-import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Search, Plus, TrendingUp, Award, Users, Bot } from "lucide-react";
+import Footer from "@/components/Footer";
+import Header from "@/components/Header";
 
 export default function Home() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+      <Header />
+      {/* Hero Section */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-4xl font-bold text-foreground mb-4">
+            Get Answers, Earn Rewards
+          </h2>
+          <p className="text-xl text-muted-foreground mb-8">
+            The Web3 community-driven Q&A platform where knowledge meets bounty
+            rewards
+          </p>
+
+          {/* Search Bar */}
+          <div className="relative max-w-2xl mx-auto mb-8">
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+            <Input
+              placeholder="Search questions or ask something new..."
+              className="pl-12 pr-4 py-6 text-lg h-12"
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            <Button
+              className="absolute right-2 top-1/9"
+              size="sm"
+            >
+              Search
+            </Button>
+          </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-2xl mx-auto">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-primary">2,847</div>
+              <div className="text-sm text-muted-foreground">
+                Questions Asked
+              </div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-primary">15,392</div>
+              <div className="text-sm text-muted-foreground">Answers Given</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-primary">$12,450</div>
+              <div className="text-sm text-muted-foreground">Bounties Paid</div>
+            </div>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </section>
+
+      {/* Featured Questions */}
+      <section className="py-12 px-4 sm:px-6 lg:px-8 bg-muted/30">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-between mb-8">
+            <h3 className="text-2xl font-bold text-foreground">
+              Trending Questions
+            </h3>
+            <Button>
+              <TrendingUp className="w-4 h-4 mr-2" />
+              View All
+            </Button>
+          </div>
+
+          <div className="grid gap-6">
+            {/* Sample Question Cards */}
+            <Card className="hover:shadow-md transition-shadow">
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <CardTitle className="text-lg mb-2">
+                      How to implement cross-chain token transfers using
+                      LayerZero?
+                    </CardTitle>
+                    <CardDescription>
+                      Looking for best practices and security considerations
+                      when implementing cross-chain functionality...
+                    </CardDescription>
+                  </div>
+                  <Badge className="ml-4">
+                    <Award className="w-3 h-3 mr-1" />
+                    $50
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <div className="flex items-center gap-4">
+                    <span className="flex items-center gap-1">
+                      <Users className="w-4 h-4" />5 answers
+                    </span>
+                    <span>Asked 2 hours ago</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <Badge variant="secondary">solidity</Badge>
+                    <Badge variant="secondary">cross-chain</Badge>
+                    <Badge variant="secondary">layerzero</Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-md transition-shadow">
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <CardTitle className="text-lg mb-2">
+                      What are the gas optimization techniques for NFT minting
+                      contracts?
+                    </CardTitle>
+                    <CardDescription>
+                      Need help reducing gas costs for a large-scale NFT
+                      collection launch...
+                    </CardDescription>
+                  </div>
+                  <Badge variant="default" className="ml-4">
+                    <Award className="w-3 h-3 mr-1" />
+                    $75
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <div className="flex items-center gap-4">
+                    <span className="flex items-center gap-1">
+                      <Users className="w-4 h-4" />
+                      12 answers
+                    </span>
+                    <span>Asked 4 hours ago</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <Badge variant="secondary">nft</Badge>
+                    <Badge variant="secondary">gas-optimization</Badge>
+                    <Badge variant="secondary">ethereum</Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-md transition-shadow">
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <CardTitle className="text-lg mb-2">
+                      Best practices for DeFi protocol security audits?
+                    </CardTitle>
+                    <CardDescription>
+                      What should I look for when reviewing smart contracts
+                      before deployment...
+                    </CardDescription>
+                  </div>
+                  <Badge className="ml-4">
+                    <Award className="w-3 h-3 mr-1" />
+                    $100
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <div className="flex items-center gap-4">
+                    <span className="flex items-center gap-1">
+                      <Users className="w-4 h-4" />8 answers
+                    </span>
+                    <span>Asked 6 hours ago</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <Badge variant={"secondary"}>defi</Badge>
+                    <Badge variant={"secondary"}>security</Badge>
+                    <Badge variant={"secondary"}>audit</Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      <Footer />
     </div>
   );
 }
