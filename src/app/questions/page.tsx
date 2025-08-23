@@ -27,6 +27,7 @@ import {
   User,
 } from "lucide-react";
 import Link from "next/link";
+import { ModeToggle } from "@/components/mode-toggle";
 
 // Mock data - in real app this would come from database
 const questions = [
@@ -202,6 +203,7 @@ export default function QuestionsPage() {
                     </SelectItem>
                   </SelectContent>
                 </Select>
+                <ModeToggle />
               </div>
             </div>
 
@@ -228,9 +230,9 @@ export default function QuestionsPage() {
                           <div className="flex items-center gap-2">
                             <Avatar className="w-5 h-5">
                               <AvatarImage
-                                src={
-                                  question.author.avatar || "/placeholder.svg"
-                                }
+                              // src={
+                              //   question.author.avatar || "/placeholder.svg"
+                              // }
                               />
                               <AvatarFallback>
                                 <User className="w-3 h-3" />
@@ -380,7 +382,7 @@ export default function QuestionsPage() {
                       </div>
                       <Avatar className="w-8 h-8">
                         <AvatarImage
-                          src={`/abstract-geometric-shapes.png?height=32&width=32&query=${contributor.name}`}
+                        // src={`/abstract-geometric-shapes.png?height=32&width=32&query=${contributor.name}`}
                         />
                         <AvatarFallback>
                           <User className="w-4 h-4" />

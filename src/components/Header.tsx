@@ -1,6 +1,12 @@
+"use client";
 import React from "react";
 import { Button } from "./ui/button";
 import { Bot, Plus } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import WalletBtn from "./wallet-btn";
+import { useWallet } from "@/context/WalletContext";
+import { toast } from "sonner";
 
 export default function Header() {
   return (
@@ -34,7 +40,18 @@ export default function Header() {
             >
               Leaderboard
             </a>
-            <Button size="sm">
+            <Button
+              size="sm"
+              onClick={() =>
+                toast("Event has been created", {
+                  description: "Sunday, December 03, 2023 at 9:00 AM",
+                  action: {
+                    label: "Undo",
+                    onClick: () => console.log("Undo"),
+                  },
+                })
+              }
+            >
               <Bot className="w-4 h-4 mr-2" />
               AI Assistant
             </Button>
@@ -42,6 +59,7 @@ export default function Header() {
               <Plus className="w-4 h-4 mr-2" />
               Ask Question
             </Button>
+            <WalletBtn />
           </nav>
         </div>
       </div>
