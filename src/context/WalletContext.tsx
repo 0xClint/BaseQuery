@@ -1,5 +1,9 @@
 "use client";
-import { cdpClient } from "@/lib/cdpClient";
+// import { cdpClient } from "@/lib/cdpClient";
+import {
+  STORAGE_CONTRACT_ABI,
+  STORAGE_CONTRACT_ADDRESS,
+} from "@/lib/constants";
 import { useSession } from "next-auth/react";
 import {
   createContext,
@@ -10,6 +14,7 @@ import {
   useState,
 } from "react";
 import { toast } from "sonner";
+import { encodeFunctionData } from "viem";
 
 interface WalletProviderProps {
   children: ReactNode;
@@ -17,7 +22,7 @@ interface WalletProviderProps {
 
 const WalletProviderFn = () => {
   const { status, data: session } = useSession();
-  const [evmAddress, setEvmAddress] = useState<string>("");
+  const [evmAddress, setEvmAddress] = useState<`0x${string}`>("0x");
   const [accountId, setAccountId] = useState<string>();
   const [balances, setBalances] = useState<string>("0.00");
 
@@ -72,10 +77,50 @@ const WalletProviderFn = () => {
     }
   }, [evmAddress, refreshBalance]);
 
+  const createQuestion = async () => {
+    // const encodedTransferCall = encodeFunctionData({
+    //   abi: STORAGE_CONTRACT_ABI,
+    //   functionName: "store",
+    //   args: [1000],
+    // });
+
+    if (!evmAddress) return;
+
+    const res = await fetch(`/api/temp`);
+    if (res.ok) {
+      const { address } = await res.json();
+    }
+    // const txResult = await cdpClient.evm.sendTransaction({
+    //   address: evmAddress,
+    //   network: "base-sepolia",
+    //   transaction: {
+    //     to: STORAGE_CONTRACT_ADDRESS, // recipient address
+    //     // value: parseEther("0.000001"), // sending 0.000001 ETH
+    //     data: encodedTransferCall,
+    //   },
+    // });
+    // console.log(txResult);
+    // const encodedTransferCall = encodeFunctionData({
+    //   abi: BASEQUERY_CONTRACT_ABI,
+    //   functionName: "createQuestion",
+    //   args: ["ipfs hash", 1000, 0, false],
+    // });
+    // const txResult = await cdpClient.evm.sendTransaction({
+    //   address: evmAddress,
+    //   network: "base-sepolia",
+    //   transaction: {
+    //     to: BASEQUERY_CONTRACT_ADDRESS, // recipient address
+    //     // value: parseEther("0.000001"), // sending 0.000001 ETH
+    //     data: encodedTransferCall,
+    //   },
+    // });
+    // console.log(txResult);
+  };
   return {
     evmAddress,
     accountId,
     fetchEvmAddress,
+    createQuestion,
     // getAccounts,
     requestFaucet,
     refreshBalance,

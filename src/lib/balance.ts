@@ -23,3 +23,4 @@ export const getBalanceForAddress = async (
   // return "hello";
   return formatUnits(tokenBalance.amount.amount, tokenBalance.amount.decimals);
 };
+  
