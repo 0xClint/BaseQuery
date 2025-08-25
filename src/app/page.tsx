@@ -9,12 +9,10 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Plus, TrendingUp, Award, Users, Bot } from "lucide-react";
+import { Search, TrendingUp, Award, Users, Bot } from "lucide-react";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
-import { useWallet } from "@/context/WalletContext";
-import axios from "axios";
-import { QuestionItem } from "@/types/Question.type";
+
 import Link from "next/link";
 
 const dummyQuestions = [

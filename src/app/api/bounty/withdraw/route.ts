@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "@/lib/auth";
 import { cdpClient } from "@/lib/cdpClient";
 import { hashEmail } from "@/lib/utils";
-import { createWalletClient, http, parseUnits } from "viem";
+import { createWalletClient, http } from "viem";
 import { toAccount } from "viem/accounts";
 import { baseSepolia } from "viem/chains";
 import { publicClient } from "@/lib/viemConfig";

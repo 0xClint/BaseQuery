@@ -13,14 +13,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import {
-  ArrowLeft,
-  Award,
   ThumbsUp,
   ThumbsDown,
   Clock,
   User,
 } from "lucide-react";
-import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useParams } from "next/navigation";

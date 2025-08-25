@@ -12,13 +12,12 @@ import React from "react";
 export default function Page() {
   // <-- Capital "P"
   const {
-    evmAddress,
-    createQuestion,
+
     createAnswer,
     upVote,
     selectBestAnswer,
     withdrawBounty,
-    questionList,
+
     fetchQuestionById,
   } = useWallet();
 

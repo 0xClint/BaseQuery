@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -20,7 +19,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Search,
   Filter,
-  Plus,
   Award,
   Users,
   Clock,
@@ -28,7 +26,6 @@ import {
   User,
 } from "lucide-react";
 import Link from "next/link";
-import { ModeToggle } from "@/components/mode-toggle";
 import { useWallet } from "@/context/WalletContext";
 import { formatUnits } from "viem";
 import { formatTimestamp } from "@/lib/utils";
