@@ -8,6 +8,7 @@ import WalletBtn from "./wallet-btn";
 import { useWallet } from "@/context/WalletContext";
 import { toast } from "sonner";
 import Link from "next/link";
+import { LogoName, LogoSymbol } from "@/assets";
 
 export default function Header() {
   return (
@@ -15,12 +16,9 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-lg">
-                C
-              </span>
-            </div>
-            <h1 className="text-xl font-bold text-foreground"></h1>
+            <Link href={"/"}>
+              <img src={LogoName.src} alt="BaseQuery" className="h-10" />
+            </Link>
           </div>
           <nav className="hidden md:flex items-center gap-6">
             <a

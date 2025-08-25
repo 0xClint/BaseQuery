@@ -1,8 +1,11 @@
 export type AnswerFetchedItems = {
   id: number;
   questionId: number;
-  provider: `0x${string}`;
-  timestamp: number;
+  address: string;
+  content: string;
+  owner: string;
+  createdAt: number;
   upvotes: number;
   downvotes: number;
+  amount: number;
 };

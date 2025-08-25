@@ -5,7 +5,7 @@ import {
   BASEQUERY_CONTRACT_ADDRESS,
 } from "@/lib/constants";
 import { publicClient } from "@/lib/viemConfig";
-import { QuestionItem } from "@/types/Question.type";
+import { AllQuestionItem, QuestionItem } from "@/types/Question.type";
 
 export async function GET() {
   try {
@@ -15,38 +15,59 @@ export async function GET() {
       functionName: "getAllQuestions",
     });
 
-    console.log("Contract returned:", data);
-
-    if (!Array.isArray(data) || data.length < 2) {
-      console.error("Unexpected format from contract");
+    if (!Array.isArray(data) || data.length < 7) {
+      console.error("Unexpected format from contract", data);
       return NextResponse.json({ questions: [] });
     }
 
-    const [questionIds, ipfsHashes] = data as [
+    // Destructure tuple arrays
+    const [
+      questionIds,
+      ipfsHashes,
+      creators,
+      amounts,
+      isPool,
+      isActive,
+      timestamps,
+    ] = data as [
       readonly bigint[],
-      readonly string[]
+      readonly string[],
+      readonly `0x${string}`[],
+      readonly bigint[],
+      readonly boolean[],
+      readonly boolean[],
+      readonly bigint[]
     ];
 
-    const questions: QuestionItem[] = [];
+    // Convert into array of objects
+    const questions: AllQuestionItem[] = [];
 
     for (let idx = 0; idx < questionIds.length; idx++) {
       try {
         const ipfsHash = JSON.parse(ipfsHashes[idx]);
-
         if (
           ipfsHash &&
           typeof ipfsHash === "object" &&
           !Array.isArray(ipfsHash)
         ) {
           questions.push({
-            id: Number(questionIds[idx]), // <- bigint → number
+            id: Number(questionIds[idx]),
+            ownerAddress: creators[idx],
+            amount: Number(amounts[idx]),
+            isPool: isPool[idx],
+            isActive: isActive[idx],
+            createdAt: Number(timestamps[idx]),
             ...ipfsHash,
           });
         } else {
           console.warn("Invalid ipfsHash at index", idx, ipfsHash);
         }
-      } catch (err) {
-        console.error("Failed to parse ipfsHash at index:", idx, err);
+      } catch (error) {
+        console.error("Error fetching questions:", error);
+        return NextResponse.json(
+          { error: "Failed to fetch questions" },
+          { status: 500 }
+        );
       }
     }
 

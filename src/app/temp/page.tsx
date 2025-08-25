@@ -9,7 +9,8 @@ import {
 import { publicClient } from "@/lib/viemConfig";
 import React from "react";
 
-export default function page() {
+export default function Page() {
+  // <-- Capital "P"
   const {
     evmAddress,
     createQuestion,
@@ -40,9 +41,7 @@ export default function page() {
     });
     console.log(data);
   };
-  // console.log(questionList);
 
-  const fetchAnwserID = async () => {};
   return (
     <div>
       <Header />
@@ -56,7 +55,6 @@ export default function page() {
       <Button onClick={() => upVote(4, 2, true)}>upVote</Button>
       <Button onClick={() => selectBestAnswer(9, 4)}>selectBestAnswer</Button>
       <Button onClick={() => withdrawBounty(9)}>withdrawBounty</Button>
-      <Button onClick={() => handleQuery()}>Query</Button>
     </div>
   );
 }

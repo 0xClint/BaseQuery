@@ -86,7 +86,10 @@ export async function POST(request: NextRequest) {
       abi: BASEQUERY_CONTRACT_ABI,
       functionName: "createQuestion",
       args: [
-        JSON.stringify(question),
+        JSON.stringify({
+          ...question,
+          owner: session?.user.name || "John",
+        }),
         bountyAmountInUSDC,
         poolDuration,
         useAsPool,

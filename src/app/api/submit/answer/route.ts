@@ -32,13 +32,6 @@ export async function POST(request: NextRequest) {
   const account = await cdpClient.evm.getAccount({
     name: hashEmail(session?.user.email || "clintty"),
   });
-
-  const { cid } = await pinataClient.upload.public.json(res);
-  const answerUrl = await pinataClient.gateways.public.convert(cid);
-  // const answerUrl =
-  //   "https://gateway.pinata.cloud/ipfs/bafkreiayzwoss6gqmlz2chp3bmamavb5kv6gnr3i2vfz5mmmyx7e54suca";
-  console.log("[answerUrl]:" + answerUrl);
-
   try {
     const walletClient = createWalletClient({
       account: toAccount(account),
@@ -52,7 +45,10 @@ export async function POST(request: NextRequest) {
       address: BASEQUERY_CONTRACT_ADDRESS,
       abi: BASEQUERY_CONTRACT_ABI,
       functionName: "submitAnswer",
-      args: [res.questionId, answerUrl],
+      args: [
+        res.questionId,
+        JSON.stringify({ content: res.answer, owner: session?.user.name }),
+      ],
     });
     const hash = await walletClient.writeContract(request);
     await publicClient.waitForTransactionReceipt({

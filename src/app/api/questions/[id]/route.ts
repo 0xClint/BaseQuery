@@ -1,18 +1,23 @@
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 import {
   BASEQUERY_CONTRACT_ABI,
   BASEQUERY_CONTRACT_ADDRESS,
 } from "@/lib/constants";
 import { publicClient } from "@/lib/viemConfig";
-import { QuestionFetchedItems, QuestionItem } from "@/types/Question.type";
+import { QuestionFetchedItems } from "@/types/Question.type";
+import { Abi } from "viem";
+import { parseResults, sortAnswersByVotes } from "@/lib/utils";
+import { AnswerFetchedItems } from "@/types/Answers.type";
 
 export async function GET(
-  _req: Request,
+  _req: NextRequest,
   { params }: { params: { id: string } }
-) {
+): Promise<NextResponse> {
   try {
-    const questionId = BigInt(params.id);
+    const { id: paramsId } = params;
+    const questionId = BigInt(paramsId);
 
     const data = await publicClient.readContract({
       address: BASEQUERY_CONTRACT_ADDRESS,
@@ -46,6 +51,7 @@ export async function GET(
       boolean,
       bigint
     ];
+
     let questiondata = JSON.parse(ipfsHash);
 
     questiondata =
@@ -55,6 +61,23 @@ export async function GET(
         ? questiondata
         : null;
 
+    const answers = [];
+
+    const contracts = answerIds.map((id) => ({
+      address: BASEQUERY_CONTRACT_ADDRESS as `0x${string}`,
+      abi: BASEQUERY_CONTRACT_ABI as Abi,
+      functionName: "getAnswer",
+      args: [id],
+    }));
+
+    const result = await publicClient.multicall({
+      contracts,
+    });
+
+    let paresdResult: AnswerFetchedItems[] = parseResults(result);
+
+    if (isPoolQuestion) paresdResult = sortAnswersByVotes(paresdResult);
+
     const question: QuestionFetchedItems = {
       id: Number(id),
       owner,
@@ -63,7 +86,7 @@ export async function GET(
       poolAmount: Number(poolAmount),
       poolEndTime: Number(poolEndTime),
       selectedAnswerId: Number(selectedAnswerId),
-      answerIds: (answerIds as readonly bigint[]).map((a) => Number(a)),
+      answers: paresdResult,
       isActive,
       isPoolQuestion,
       timestamp: Number(timestamp),

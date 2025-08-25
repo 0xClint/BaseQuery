@@ -86,7 +86,7 @@ const dummyQuestions = [
 ];
 
 export default function Home() {
-  // const { questionList } = useWallet();
+  // const { balances } = useWallet();
   // console.log(questionList);
   return (
     <div className="min-h-screen bg-background">

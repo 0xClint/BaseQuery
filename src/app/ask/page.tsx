@@ -123,7 +123,7 @@ export default function AskQuestionPage() {
     if (data.bountyDeadline && data.bountyDeadline.trim() !== "") {
       const selectedDate = new Date(data.bountyDeadline);
       const now = new Date();
-      const minDate = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours from now
+      const minDate = new Date(now.getTime() + 60 * 1000); // 24 hours from now
 
       if (selectedDate <= minDate) {
         alert("Bounty deadline must be at least 24 hours in the future.");
@@ -155,6 +155,8 @@ export default function AskQuestionPage() {
       setSuccess(true);
       console.log("Form submitted successfully:", data);
       toast.success("Question submitted successfully!");
+
+      // await new Promise((res) => setTimeout(res, 1000));
     } catch (error) {
       console.log(error);
     } finally {
@@ -179,7 +181,7 @@ export default function AskQuestionPage() {
             </DialogHeader>
 
             <DialogFooter>
-              <Link href={"/"}>
+              <Link href={"/questions"}>
                 <Button type="submit">Home</Button>
               </Link>
             </DialogFooter>
@@ -379,7 +381,7 @@ export default function AskQuestionPage() {
                           <Calendar className="w-4 h-4 text-muted-foreground" />
                           <Input
                             id="bountyDeadline"
-                            type="date"
+                            type="datetime-local"
                             min={
                               new Date(Date.now() + 24 * 60 * 60 * 1000)
                                 .toISOString()

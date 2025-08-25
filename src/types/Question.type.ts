@@ -1,8 +1,20 @@
+import { AnswerFetchedItems } from "./Answers.type";
+
 export type QuestionItem = {
   id?: string | number;
   title: string;
   content: string;
   tags: string[];
+  owner?: string;
+};
+
+export type AllQuestionItem = QuestionItem & {
+  id: string | number;
+  ownerAddress: string;
+  amount: number;
+  isPool: boolean;
+  isActive: boolean;
+  createdAt: number;
 };
 
 export type AnwserItem = {
@@ -21,7 +33,7 @@ export type QuestionFetchedItems = {
   poolAmount: number;
   poolEndTime: number;
   selectedAnswerId: number;
-  answerIds: number[];
+  answers: AnswerFetchedItems[];
   isActive: boolean;
   isPoolQuestion: boolean;
   timestamp: number;

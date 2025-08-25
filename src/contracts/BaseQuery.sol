@@ -15,7 +15,7 @@ interface IReputationSystem {
     function getUserReputation(address user) external view returns (uint256, uint256);
 }
 
-contract StackExchange is Ownable {
+contract BaseQuery is Ownable {
     error QuestionNotFound();
     error AnswerNotFound();
     error NotQuestionOwner();
@@ -209,6 +209,9 @@ contract StackExchange is Ownable {
             revert USDCTransferFailed();
         }
 
+        // Mark question as inactive since best answer is selected
+        question.isActive = false;
+
         emit BestAnswerSelected(questionId, answerId, answer.provider, reward);
     }
 
@@ -256,6 +259,9 @@ contract StackExchange is Ownable {
             }
         }
 
+        // Mark question as inactive since pool is distributed
+        question.isActive = false;
+
         emit PoolDistributed(questionId, winners, rewards);
     }
 
@@ -297,6 +303,9 @@ contract StackExchange is Ownable {
             revert USDCTransferFailed();
         }
 
+        // Mark question as inactive since pool is withdrawn
+        question.isActive = false;
+
         emit PoolWithdrawn(questionId, msg.sender, withdrawalAmount, fee);
     }
 
@@ -326,6 +335,9 @@ contract StackExchange is Ownable {
             revert USDCTransferFailed();
         }
 
+        // Mark question as inactive since bounty is withdrawn
+        question.isActive = false;
+
         emit BountyWithdrawn(questionId, msg.sender, withdrawalAmount, fee);
     }
 
@@ -346,6 +358,45 @@ contract StackExchange is Ownable {
         }
 
         reputationSystem.vote(questionId, answerId, contentType, isUpvote, contentOwner, msg.sender);
+    }
+
+    function calculateIndividualPoolReward(uint256 questionId, uint256 answerId) 
+        internal 
+        view 
+        returns (uint256) 
+    {
+        Question storage question = questions[questionId];
+        uint256 distributionAmount = question.poolAmount - ((question.poolAmount * PLATFORM_FEE) / 10000);
+        uint256 answerCount = question.answerIds.length;
+        
+        if (answerCount == 0) return 0;
+        
+        // Get this answer's score
+        (uint256 upvotes, uint256 downvotes) = reputationSystem.getVoteCount(
+            questionId, answerId, IReputationSystem.ContentType.ANSWER
+        );
+        int256 answerScore = int256(upvotes) - int256(downvotes);
+        
+        // If negative score, no reward
+        if (answerScore <= 0) return 0;
+        
+        // Calculate total score for all answers
+        uint256 totalScore = 0;
+        for (uint256 i = 0; i < answerCount; i++) {
+            (uint256 up, uint256 down) = reputationSystem.getVoteCount(
+                questionId, question.answerIds[i], IReputationSystem.ContentType.ANSWER
+            );
+            int256 score = int256(up) - int256(down);
+            if (score > 0) {
+                totalScore += uint256(score);
+            }
+        }
+        
+        if (totalScore == 0) return 0;
+        
+        // Calculate this answer's share
+        uint256 share = (distributionAmount * uint256(answerScore)) / totalScore;
+        return share;
     }
 
     function calculatePoolDistribution(uint256 questionId) 
@@ -482,7 +533,8 @@ contract StackExchange is Ownable {
         string memory ipfsHash,
         uint256 timestamp,
         uint256 upvotes,
-        uint256 downvotes
+        uint256 downvotes,
+        uint256 prizeAmount
     ) {
         if (answerId == 0 || answerId > answerCounter) revert AnswerNotFound();
         
@@ -491,6 +543,33 @@ contract StackExchange is Ownable {
             a.questionId, answerId, IReputationSystem.ContentType.ANSWER
         );
         
+        // Calculate individual answer's reward amount
+        uint256 prize = 0;
+        
+        // Check if this answer is selected as best answer first
+        if (questions[a.questionId].selectedAnswerId == answerId) {
+            // This answer was selected as best answer
+            if (questions[a.questionId].poolAmount > 0) {
+                // Pool question - prize was already distributed
+                prize = 0;
+            } else {
+                // Bounty question - prize was the bounty amount (already transferred)
+                // We can't return the current bountyAmount since it's 0 after transfer
+                // For now, we'll return 0 to indicate it was already paid
+                prize = 0;
+            }
+        } else {
+            // Answer not selected yet
+            if (questions[a.questionId].poolAmount > 0) {
+                // Pool question - calculate potential reward
+                if (!questions[a.questionId].poolDistributed) {
+                    prize = calculateIndividualPoolReward(a.questionId, answerId);
+                }
+                // If pool already distributed, prize = 0
+            }
+            // For bounty questions, prize = 0 until selected
+        }
+        
         return (
             answerId,
             a.questionId,
@@ -498,7 +577,8 @@ contract StackExchange is Ownable {
             a.ipfsHash,
             a.timestamp,
             upvoteCount,
-            downvoteCount
+            downvoteCount,
+            prize
         );
     }
 
@@ -526,18 +606,42 @@ contract StackExchange is Ownable {
 
     function getAllQuestions() external view returns (
         uint256[] memory questionIds,
-        string[] memory ipfsHashes
+        string[] memory ipfsHashes,
+        address[] memory creators,
+        uint256[] memory amounts,
+        bool[] memory isPoolQuestions,
+        bool[] memory isActiveQuestions,
+        uint256[] memory timestamps
     ) {
         uint256 totalQuestions = questionCounter;
         
         questionIds = new uint256[](totalQuestions);
         ipfsHashes = new string[](totalQuestions);
+        creators = new address[](totalQuestions);
+        amounts = new uint256[](totalQuestions);
+        isPoolQuestions = new bool[](totalQuestions);
+        isActiveQuestions = new bool[](totalQuestions);
+        timestamps = new uint256[](totalQuestions);
         
         for (uint256 i = 1; i <= totalQuestions; i++) {
+            Question storage q = questions[i];
             questionIds[i - 1] = i;
-            ipfsHashes[i - 1] = questions[i].ipfsHash;
+            ipfsHashes[i - 1] = q.ipfsHash;
+            creators[i - 1] = q.owner;
+            
+            // Return pool amount if it's a pool question, bounty amount otherwise
+            if (q.poolAmount > 0) {
+                amounts[i - 1] = q.poolAmount;
+                isPoolQuestions[i - 1] = true;
+            } else {
+                amounts[i - 1] = q.bountyAmount;
+                isPoolQuestions[i - 1] = false;
+            }
+            
+            isActiveQuestions[i - 1] = q.isActive;
+            timestamps[i - 1] = q.timestamp;
         }
         
-        return (questionIds, ipfsHashes);
+        return (questionIds, ipfsHashes, creators, amounts, isPoolQuestions, isActiveQuestions, timestamps);
     }
 }

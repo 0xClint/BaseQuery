@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
@@ -28,6 +29,13 @@ import { useEffect, useState } from "react";
 import { QuestionFetchedItems } from "@/types/Question.type";
 import Loader from "@/components/Loader";
 import { formatUnits } from "viem";
+import { formatEndTime, formatTimestamp } from "@/lib/utils";
+import z from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import Header from "@/components/Header";
 
 // Mock data - in real app this would come from database
 const questionData = {
@@ -142,18 +150,38 @@ Hope this helps! Let me know if you need clarification on any part.`,
   ],
 };
 
+const answerSchema = z.object({
+  content: z
+    .string()
+    .min(10, "Question details must be at least 10 characters")
+    .max(5000, "Question details must be less than 5000 characters"),
+});
+
+type AnswerFormData = z.infer<typeof answerSchema>;
+
 export default function QuestionDetailPage() {
   const { id } = useParams();
   const [data, setData] = useState<QuestionFetchedItems | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const { fetchQuestionById } = useWallet();
+  const [answerLoading, setAnswerLoading] = useState<boolean>(false);
+  const [selectionLoading, setSelectionLoading] = useState<boolean>(false);
+  const [voteLoading, setVoteLoading] = useState<boolean>(false);
+  const {
+    fetchQuestionById,
+    createAnswer,
+    upVote,
+    evmAddress,
+    selectBestAnswer,
+  } = useWallet();
 
   useEffect(() => {
     const fetchData = async () => {
       if (id) {
         setLoading(true);
         try {
-          setData(await fetchQuestionById(Number(id)));
+          const res = await fetchQuestionById(Number(id));
+          console.log(res);
+          setData(res);
         } catch (error) {
           console.error(error);
           setData(null);
@@ -215,30 +243,69 @@ export default function QuestionDetailPage() {
       </code>
     ),
   } as const;
+
+  // const handleAnswer = async () => {
+  //   if (answerContent && data?.id) {
+  //
+  //   }
+  // };
+  const form = useForm<AnswerFormData>({
+    resolver: zodResolver(answerSchema),
+    defaultValues: {
+      content: "",
+    },
+  });
+
+  const onSubmit = async (formData: AnswerFormData) => {
+    console.log(formData);
+
+    const questionId = data?.id;
+    if (!questionId) return;
+
+    try {
+      setAnswerLoading(true);
+      await createAnswer(questionId, formData.content);
+      form.reset();
+      toast.success("Answer submitted successfully!");
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setAnswerLoading(false);
+    }
+  };
+
+  const handleVote = async (answerId: number, isUpvote: boolean) => {
+    const res = data;
+    if (res?.id && answerId) {
+      try {
+        setVoteLoading(true);
+        await upVote(res.id, answerId, isUpvote);
+        toast.success("Vote submitted successfully!");
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setVoteLoading(false);
+      }
+    }
+  };
+
+  const handleSelectBestAnswer = async (answerId: number) => {
+    const res = data;
+    if (res?.id && answerId) {
+      try {
+        setSelectionLoading(true);
+        await selectBestAnswer(res.id, answerId);
+        toast.success("Best answer selected, bounty has been closed!");
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setSelectionLoading(false);
+      }
+    }
+  };
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-4">
-              <Link href="/">
-                <Button variant="neutral" size="sm">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Questions
-                </Button>
-              </Link>
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                  <span className="text-primary-foreground font-bold text-lg">
-                    C
-                  </span>
-                </div>
-                <h1 className="text-xl font-bold text-foreground">BaseQuery</h1>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
       {loading ? (
         <div className="w-full h-screen flex-center">
           <Loader />
@@ -251,38 +318,38 @@ export default function QuestionDetailPage() {
               {/* Question */}
               <Card className="mb-8">
                 <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="text-2xl mb-4">
-                        {data?.question?.title}
-                      </CardTitle>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-                        <div className="flex items-center gap-2">
-                          <Avatar className="w-6 h-6">
-                            <AvatarImage src={"/placeholder.svg"} />
-                            <AvatarFallback>
-                              <User className="w-3 h-3" />
-                            </AvatarFallback>
-                          </Avatar>
-                          <span>{questionData.author.name}</span>
-                          <span>•</span>
-                          <span>{questionData.author.reputation} rep</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
-                          <span>{data?.timestamp}</span>
-                        </div>
+                  {/* <div className="flex items-start justify-between"> */}
+                  <div className="flex-1">
+                    <CardTitle className="text-2xl mb-4">
+                      {data?.question?.title}
+                    </CardTitle>
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
+                      <div className="flex items-center gap-2">
+                        <Avatar className="w-6 h-6">
+                          <AvatarImage src={"/placeholder.svg"} />
+                          <AvatarFallback>
+                            <User className="w-3 h-3" />
+                          </AvatarFallback>
+                        </Avatar>
+                        <span>{data?.question?.owner}</span>
                       </div>
-                      <div className="flex gap-2 mb-4">
-                        {data &&
-                          data.question &&
-                          data?.question.tags.map((tag) => (
-                            <Badge key={tag} variant="secondary">
-                              {tag}
-                            </Badge>
-                          ))}
+                      <span>•</span>
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-4 h-4" />
+                        <span>{formatTimestamp(data?.timestamp || 0)}</span>
                       </div>
                     </div>
+                    <div className="flex gap-2 mb-4">
+                      {data &&
+                        data.question &&
+                        data?.question.tags.map((tag) => (
+                          <Badge key={tag} variant="secondary">
+                            {tag}
+                          </Badge>
+                        ))}
+                    </div>
+                  </div>
+                  <CardAction className="flex flex-col gap-2">
                     <Badge className="ml-4 text-2xl font-semibold">
                       $
                       {formatUnits(
@@ -295,7 +362,8 @@ export default function QuestionDetailPage() {
                       )}
                       USDC
                     </Badge>
-                  </div>
+                  </CardAction>
+                  {/* </div> */}
                 </CardHeader>
                 <CardContent>
                   <div className="prose prose-sm max-w-none text-foreground prose-li:marker:text-black prose-hr:border-black">
@@ -316,69 +384,105 @@ export default function QuestionDetailPage() {
                 </h3>
 
                 <div className="space-y-6">
-                  {questionData.answers.map((answer) => (
-                    <Card
-                      key={answer.id}
-                      className={answer.isAccepted ? "border-primary" : ""}
-                    >
-                      <CardHeader>
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center gap-4">
-                            <div className="flex flex-col items-center gap-2">
-                              <Button size="icon" className="p-1">
-                                <ThumbsUp className="w-4 h-4" />
-                              </Button>
-                              <div className="text-sm h-7 min-w-7 px-2 bg-white font-medium border-2 rounded-[3px] mt-1 flex-center">
-                                {answer.votes}
-                              </div>
-                              <Button size="icon" className="p-1">
-                                <ThumbsDown className="w-4 h-4" />
-                              </Button>
+                  {data &&
+                    data.answers.map(
+                      ({
+                        id,
+                        upvotes,
+                        downvotes,
+                        createdAt,
+                        content,
+                        owner,
+                        amount,
+                      }) => (
+                        <Card
+                          key={id}
+                          // className={answer.isAccepted ? "border-primary" : ""}
+                        >
+                          <CardHeader>
+                            {data.selectedAnswerId == id && (
+                              <CardAction>
+                                <Badge variant="green">✓ Accepted</Badge>
+                              </CardAction>
+                            )}
+                            <div className="prose prose-sm max-w-none text-foreground prose-li:marker:text-black prose-hr:border-black">
+                              <ReactMarkdown
+                                remarkPlugins={[remarkGfm]}
+                                components={markdownComponents}
+                              >
+                                {content}
+                              </ReactMarkdown>
                             </div>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-2">
-                                {/* <Avatar className="w-6 h-6">
-                                <AvatarImage
-                                  src={
-                                    answer.author.avatar || "/placeholder.svg"
-                                  }
-                                />
-                                <AvatarFallback>
-                                  <User className="w-3 h-3" />
-                                </AvatarFallback>
-                              </Avatar> */}
-                                <span className="text-sm font-medium">
-                                  {answer.author.name}
-                                </span>
-                                <span className="text-sm text-muted-foreground">
-                                  {answer.author.reputation} rep
-                                </span>
-                                <span className="text-sm text-muted-foreground">
-                                  •
-                                </span>
-                                <span className="text-sm text-muted-foreground">
-                                  {answer.createdAt}
-                                </span>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center justify-center gap-4">
+                                <div className="flex-1">
+                                  <div className="flex items-center justify-center gap-2 ">
+                                    <Avatar className="w-6 h-6">
+                                      <AvatarImage src={"/placeholder.svg"} />
+                                      <AvatarFallback>
+                                        <User className="w-3 h-3" />
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <span className="text-sm font-medium">
+                                      {owner}
+                                    </span>
+                                    <span className="text-sm text-muted-foreground">
+                                      •
+                                    </span>
+                                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                      <Clock className="w-4 h-4" />
+                                      <span>
+                                        {formatTimestamp(createdAt || 0)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  size="icon"
+                                  className="p-1 gap-1"
+                                  disabled={voteLoading}
+                                  onClick={() => handleVote(id, true)}
+                                >
+                                  <ThumbsUp />
+                                  {upvotes}
+                                </Button>
+                                <Button
+                                  size="icon"
+                                  className=" gap-1 p-1"
+                                  disabled={voteLoading}
+                                  onClick={() => handleVote(id, false)}
+                                >
+                                  <ThumbsDown />
+                                  {downvotes}
+                                </Button>
+                                {data.isPoolQuestion && data.isActive && (
+                                  <Badge className="h-10 bg-white min-w-10 text-[12px]">
+                                    {formatUnits(BigInt(amount), 6)}USDC
+                                  </Badge>
+                                )}
+                                {!data.isPoolQuestion &&
+                                  data.isActive &&
+                                  evmAddress.toLocaleLowerCase() ==
+                                    data.owner.toLocaleLowerCase() && (
+                                    <Button
+                                      className="bg-emerald-500"
+                                      disabled={selectionLoading}
+                                      onClick={() => handleSelectBestAnswer(id)}
+                                    >
+                                      Give Bounty
+                                    </Button>
+                                  )}
                               </div>
                             </div>
-                          </div>
-                          {answer.isAccepted && (
-                            <Badge variant="green">✓ Accepted</Badge>
-                          )}
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="prose prose-sm max-w-none text-foreground prose-li:marker:text-black prose-hr:border-black">
-                          <ReactMarkdown
-                            remarkPlugins={[remarkGfm]}
-                            components={markdownComponents}
-                          >
-                            {answer.content}
-                          </ReactMarkdown>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                          </CardContent>
+                        </Card>
+                      )
+                    )}
                 </div>
               </div>
 
@@ -393,17 +497,32 @@ export default function QuestionDetailPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <Textarea
-                      placeholder="Write your answer here... You can use Markdown formatting."
-                      className="min-h-[200px] bg-white"
-                    />
-                    <div className="flex justify-between items-center">
-                      <p className="text-sm text-muted-foreground">
-                        By posting your answer, you agree to our community
-                        guidelines.
-                      </p>
-                      <Button>Post Answer</Button>
-                    </div>
+                    {answerLoading ? (
+                      <Loader />
+                    ) : (
+                      <form onSubmit={form.handleSubmit(onSubmit)}>
+                        <Label htmlFor="content">Answer</Label>
+                        <Textarea
+                          id="content"
+                          required
+                          placeholder="Write your answer here... You can use Markdown formatting."
+                          className="min-h-[200px] bg-white"
+                          {...form.register("content")}
+                        />
+                        {form.formState.errors.content && (
+                          <p className="text-sm text-destructive mt-2">
+                            {form.formState.errors.content.message}
+                          </p>
+                        )}
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm text-muted-foreground">
+                            By posting your answer, you agree to our community
+                            guidelines.
+                          </p>
+                          <Button type="submit">Post Answer</Button>
+                        </div>
+                      </form>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -418,16 +537,20 @@ export default function QuestionDetailPage() {
                     <CardTitle className="text-lg">Question Stats</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
+                    {data && data?.poolEndTime > 0 && (
+                      <Badge className="w-full py-3 bg-emerald-400 font-bold text-[15px] ">
+                        {formatEndTime(data.poolEndTime)}
+                      </Badge>
+                    )}
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Answers</span>
                       <span className="font-medium">
-                        {data?.answerIds.length}
+                        {data?.answers.length}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Bounty</span>
-                      <span className="font-medium text-primary">
-                        $
+                      <span className="font-medium text-primary font-semibold">
                         {formatUnits(
                           BigInt(
                             data?.isPoolQuestion
@@ -436,14 +559,28 @@ export default function QuestionDetailPage() {
                           ),
                           6
                         )}
+                        USDC
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Status</span>
-                      <Badge variant="active" className="">
-                        Active
-                      </Badge>
+                      {data?.isActive ? (
+                        <Badge variant="active" className="">
+                          Active
+                        </Badge>
+                      ) : (
+                        <Badge variant="neutral" className="bg-rose-500">
+                          Closed
+                        </Badge>
+                      )}
                     </div>
+                    {data &&
+                      evmAddress.toLocaleLowerCase() ==
+                        data.owner.toLocaleLowerCase() && (
+                        <Button className="w-full bg-emerald-400 mb-2">
+                          Distribute Bounty
+                        </Button>
+                      )}
                   </CardContent>
                 </Card>
 

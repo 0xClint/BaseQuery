@@ -29,7 +29,7 @@ export const INDEXER_HEADERS = {
 };
 
 export const BASEQUERY_CONTRACT_ADDRESS =
-  "0x89621966f607A69082CFaFc3031EaBf14158F56A";
+  "0x77D06640C8D434ed8baA55f19da244292277509e";
 
 export const BASEQUERY_CONTRACT_ABI = [
 	{
@@ -82,47 +82,6 @@ export const BASEQUERY_CONTRACT_ABI = [
 		"inputs": [],
 		"name": "CannotWithdrawWithGoodAnswers",
 		"type": "error"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "ipfsHash",
-				"type": "string"
-			},
-			{
-				"internalType": "uint256",
-				"name": "bountyAmount",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "poolDuration",
-				"type": "uint256"
-			},
-			{
-				"internalType": "bool",
-				"name": "useAsPool",
-				"type": "bool"
-			}
-		],
-		"name": "createQuestion",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "questionId",
-				"type": "uint256"
-			}
-		],
-		"name": "distributePool",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
 	},
 	{
 		"inputs": [],
@@ -304,24 +263,6 @@ export const BASEQUERY_CONTRACT_ABI = [
 		"type": "event"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "questionId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "additionalAmount",
-				"type": "uint256"
-			}
-		],
-		"name": "increaseBounty",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
 		"anonymous": false,
 		"inputs": [
 			{
@@ -441,119 +382,54 @@ export const BASEQUERY_CONTRACT_ABI = [
 	},
 	{
 		"inputs": [],
-		"name": "renounceOwnership",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
+		"name": "MAX_POOL_DURATION",
+		"outputs": [
 			{
 				"internalType": "uint256",
-				"name": "questionId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "answerId",
+				"name": "",
 				"type": "uint256"
 			}
 		],
-		"name": "selectBestAnswer",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "questionId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "string",
-				"name": "ipfsHash",
-				"type": "string"
-			}
-		],
-		"name": "submitAnswer",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "newOwner",
-				"type": "address"
-			}
-		],
-		"name": "transferOwnership",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "questionId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "answerId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "enum IReputationSystem.ContentType",
-				"name": "contentType",
-				"type": "uint8"
-			},
-			{
-				"internalType": "bool",
-				"name": "isUpvote",
-				"type": "bool"
-			}
-		],
-		"name": "vote",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "questionId",
-				"type": "uint256"
-			}
-		],
-		"name": "withdrawBounty",
-		"outputs": [],
-		"stateMutability": "nonpayable",
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{
 		"inputs": [],
-		"name": "withdrawPlatformFees",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
+		"name": "MIN_POOL_DURATION",
+		"outputs": [
 			{
 				"internalType": "uint256",
-				"name": "questionId",
+				"name": "",
 				"type": "uint256"
 			}
 		],
-		"name": "withdrawPool",
-		"outputs": [],
-		"stateMutability": "nonpayable",
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "PLATFORM_FEE",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "USDC",
+		"outputs": [
+			{
+				"internalType": "contract IERC20",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{
@@ -609,6 +485,47 @@ export const BASEQUERY_CONTRACT_ABI = [
 		"type": "function"
 	},
 	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "ipfsHash",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "bountyAmount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "poolDuration",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bool",
+				"name": "useAsPool",
+				"type": "bool"
+			}
+		],
+		"name": "createQuestion",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "questionId",
+				"type": "uint256"
+			}
+		],
+		"name": "distributePool",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
 		"inputs": [],
 		"name": "getAllQuestions",
 		"outputs": [
@@ -621,6 +538,31 @@ export const BASEQUERY_CONTRACT_ABI = [
 				"internalType": "string[]",
 				"name": "ipfsHashes",
 				"type": "string[]"
+			},
+			{
+				"internalType": "address[]",
+				"name": "creators",
+				"type": "address[]"
+			},
+			{
+				"internalType": "uint256[]",
+				"name": "amounts",
+				"type": "uint256[]"
+			},
+			{
+				"internalType": "bool[]",
+				"name": "isPoolQuestions",
+				"type": "bool[]"
+			},
+			{
+				"internalType": "bool[]",
+				"name": "isActiveQuestions",
+				"type": "bool[]"
+			},
+			{
+				"internalType": "uint256[]",
+				"name": "timestamps",
+				"type": "uint256[]"
 			}
 		],
 		"stateMutability": "view",
@@ -669,6 +611,11 @@ export const BASEQUERY_CONTRACT_ABI = [
 			{
 				"internalType": "uint256",
 				"name": "downvotes",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "prizeAmount",
 				"type": "uint256"
 			}
 		],
@@ -840,6 +787,24 @@ export const BASEQUERY_CONTRACT_ABI = [
 				"internalType": "uint256",
 				"name": "questionId",
 				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "additionalAmount",
+				"type": "uint256"
+			}
+		],
+		"name": "increaseBounty",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "questionId",
+				"type": "uint256"
 			}
 		],
 		"name": "isPoolExpired",
@@ -855,51 +820,12 @@ export const BASEQUERY_CONTRACT_ABI = [
 	},
 	{
 		"inputs": [],
-		"name": "MAX_POOL_DURATION",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "MIN_POOL_DURATION",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
 		"name": "owner",
 		"outputs": [
 			{
 				"internalType": "address",
 				"name": "",
 				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "PLATFORM_FEE",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
 			}
 		],
 		"stateMutability": "view",
@@ -997,6 +923,13 @@ export const BASEQUERY_CONTRACT_ABI = [
 	},
 	{
 		"inputs": [],
+		"name": "renounceOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
 		"name": "reputationSystem",
 		"outputs": [
 			{
@@ -1009,16 +942,113 @@ export const BASEQUERY_CONTRACT_ABI = [
 		"type": "function"
 	},
 	{
-		"inputs": [],
-		"name": "USDC",
-		"outputs": [
+		"inputs": [
 			{
-				"internalType": "contract IERC20",
-				"name": "",
+				"internalType": "uint256",
+				"name": "questionId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "answerId",
+				"type": "uint256"
+			}
+		],
+		"name": "selectBestAnswer",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "questionId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "ipfsHash",
+				"type": "string"
+			}
+		],
+		"name": "submitAnswer",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "newOwner",
 				"type": "address"
 			}
 		],
-		"stateMutability": "view",
+		"name": "transferOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "questionId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "answerId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "enum IReputationSystem.ContentType",
+				"name": "contentType",
+				"type": "uint8"
+			},
+			{
+				"internalType": "bool",
+				"name": "isUpvote",
+				"type": "bool"
+			}
+		],
+		"name": "vote",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "questionId",
+				"type": "uint256"
+			}
+		],
+		"name": "withdrawBounty",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "withdrawPlatformFees",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "questionId",
+				"type": "uint256"
+			}
+		],
+		"name": "withdrawPool",
+		"outputs": [],
+		"stateMutability": "nonpayable",
 		"type": "function"
 	}
 ]

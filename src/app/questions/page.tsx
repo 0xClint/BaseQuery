@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -28,6 +29,11 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { ModeToggle } from "@/components/mode-toggle";
+import { useWallet } from "@/context/WalletContext";
+import { formatUnits } from "viem";
+import { formatTimestamp } from "@/lib/utils";
+import Header from "@/components/Header";
+import Loader from "@/components/Loader";
 
 // Mock data - in real app this would come from database
 const questions = [
@@ -120,31 +126,12 @@ const questions = [
 ];
 
 export default function QuestionsPage() {
+  const { questionList } = useWallet();
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-2">
-              <Link href="/">
-                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                  <span className="text-primary-foreground font-bold text-lg">
-                    C
-                  </span>
-                </div>
-              </Link>
-              <h1 className="text-xl font-bold text-foreground">BaseQuery</h1>
-            </div>
-            <Link href="/ask">
-              <Button>
-                <Plus className="w-4 h-4 mr-2" />
-                Ask Question
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -206,98 +193,106 @@ export default function QuestionsPage() {
                 <ModeToggle />
               </div>
             </div>
+            {questionList.length == 0 ? (
+              <Loader />
+            ) : (
+              <>
+                {/* Questions List */}
+                <div className="space-y-4">
+                  {questionList.map(
+                    ({
+                      id,
+                      title,
+                      ownerAddress,
+                      owner,
+                      createdAt,
+                      tags,
+                      amount,
+                      isActive,
+                    }) => (
+                      <Card
+                        key={id}
+                        className="hover:shadow-md transition-shadow"
+                      >
+                        <CardHeader>
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <Link href={`/questions/${id}`}>
+                                <CardTitle className="text-lg mb-2 hover:text-primary transition-colors cursor-pointer">
+                                  {title}
+                                </CardTitle>
+                              </Link>
 
-            {/* Questions List */}
-            <div className="space-y-4">
-              {questions.map((question) => (
-                <Card
-                  key={question.id}
-                  className="hover:shadow-md transition-shadow"
-                >
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <Link href={`/questions/${question.id}`}>
-                          <CardTitle className="text-lg mb-2 hover:text-primary transition-colors cursor-pointer">
-                            {question.title}
-                          </CardTitle>
-                        </Link>
-                        <CardDescription className="mb-3">
-                          {question.excerpt}
-                        </CardDescription>
+                              <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+                                <div className="flex items-center gap-2">
+                                  <Avatar className="w-5 h-5">
+                                    <AvatarImage></AvatarImage>
+                                    <AvatarFallback>
+                                      <User className="w-3 h-3" />
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <span>{owner}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Clock className="w-4 h-4" />
+                                  <span>{formatTimestamp(createdAt)}</span>
+                                </div>
+                              </div>
 
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
-                          <div className="flex items-center gap-2">
-                            <Avatar className="w-5 h-5">
-                              <AvatarImage
-                              // src={
-                              //   question.author.avatar || "/placeholder.svg"
-                              // }
-                              />
-                              <AvatarFallback>
-                                <User className="w-3 h-3" />
-                              </AvatarFallback>
-                            </Avatar>
-                            <span>{question.author.name}</span>
-                            <span>•</span>
-                            <span>{question.author.reputation} rep</span>
+                              <div className="flex gap-2">
+                                {tags.map((tag) => (
+                                  <Badge key={tag} variant="secondary">
+                                    {tag}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+
+                            <div className="ml-4 flex flex-col items-end gap-2">
+                              {amount > 0 && (
+                                <Badge>
+                                  <Award className="w-3 h-3 mr-1" />
+                                  {formatUnits(BigInt(amount), 6)}USDC
+                                </Badge>
+                              )}
+                              {isActive ? (
+                                <Badge variant="active">✓ Active</Badge>
+                              ) : (
+                                <Badge variant="green">✓ Solved</Badge>
+                              )}
+                            </div>
                           </div>
-                          <div className="flex items-center gap-1">
-                            <Clock className="w-4 h-4" />
-                            <span>{question.createdAt}</span>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex items-center justify-between text-sm text-muted-foreground">
+                            <div className="flex items-center gap-4">
+                              <span className="flex items-center gap-1">
+                                <Users className="w-4 h-4" />
+                                answers
+                              </span>
+                              <span> views</span>
+                            </div>
                           </div>
-                        </div>
+                        </CardContent>
+                      </Card>
+                    )
+                  )}
+                </div>
 
-                        <div className="flex gap-2">
-                          {question.tags.map((tag) => (
-                            <Badge key={tag} variant="secondary">
-                              {tag}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="ml-4 flex flex-col items-end gap-2">
-                        {question.bounty > 0 && (
-                          <Badge>
-                            <Award className="w-3 h-3 mr-1" />${question.bounty}
-                          </Badge>
-                        )}
-                        {question.hasAcceptedAnswer ? (
-                          <Badge variant="green">✓ Solved</Badge>
-                        ) : (
-                          <Badge variant="active">✓ Active</Badge>
-                        )}
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between text-sm text-muted-foreground">
-                      <div className="flex items-center gap-4">
-                        <span className="flex items-center gap-1">
-                          <Users className="w-4 h-4" />
-                          {question.answers} answers
-                        </span>
-                        <span>{question.views} views</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            {/* Pagination */}
-            <div className="flex justify-center mt-8">
-              <div className="flex gap-2">
-                <Button disabled>Previous</Button>
-                <Button className="bg-primary text-primary-foreground">
-                  1
-                </Button>
-                <Button>2</Button>
-                <Button>3</Button>
-                <Button>Next</Button>
-              </div>
-            </div>
+                {/* Pagination */}
+                <div className="flex justify-center mt-8">
+                  <div className="flex gap-2">
+                    <Button disabled>Previous</Button>
+                    <Button className="bg-primary text-primary-foreground">
+                      1
+                    </Button>
+                    <Button>2</Button>
+                    <Button>3</Button>
+                    <Button>Next</Button>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Sidebar */}

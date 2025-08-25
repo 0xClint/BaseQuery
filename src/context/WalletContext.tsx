@@ -1,7 +1,11 @@
 "use client";
 import { questionType, selectBestAnswerType, voteType } from "@/types/submit";
 import { INDEXER_ENDPOINT, INDEXER_HEADERS } from "@/lib/constants";
-import { QuestionFetchedItems, QuestionItem } from "@/types/Question.type";
+import {
+  AllQuestionItem,
+  QuestionFetchedItems,
+  QuestionItem,
+} from "@/types/Question.type";
 import { useSession } from "next-auth/react";
 import {
   createContext,
@@ -23,7 +27,7 @@ const WalletProviderFn = () => {
   const [evmAddress, setEvmAddress] = useState<`0x${string}`>("0x");
   const [accountId, setAccountId] = useState<string>();
   const [balances, setBalances] = useState<string>("0.00");
-  const [questionList, setQuestionList] = useState<QuestionItem[]>([]);
+  const [questionList, setQuestionList] = useState<AllQuestionItem[]>([]);
 
   const fetchEvmAddress = useCallback(async () => {
     console.log(session);
@@ -163,12 +167,14 @@ const WalletProviderFn = () => {
       const res = await fetch("/api/questions");
       if (!res.ok) throw new Error(`Failed to fetch questions: ${res.status}`);
 
-      const { questions } = (await res.json()) as { questions: QuestionItem[] };
+      const { questions } = (await res.json()) as {
+        questions: AllQuestionItem[];
+      };
       console.log(questions);
-      // setQuestionList(questions);
+      setQuestionList(questions);
     } catch (error) {
       console.error("Error fetching questions:", error);
-      setQuestionList([]);
+      // setQuestionList([]);
     }
   }, []);
 
