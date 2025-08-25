@@ -113,10 +113,14 @@ export default function Home() {
                 <Card className="hover:shadow-md transition-shadow" key={id}>
                   <CardHeader>
                     <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="text-lg mb-2">{title}</CardTitle>
-                        <CardDescription>{content}</CardDescription>
-                      </div>
+                      <Link href={"/questions"}>
+                        <div className="flex-1">
+                          <CardTitle className="text-lg mb-2">
+                            {title}
+                          </CardTitle>
+                          <CardDescription>{content}</CardDescription>
+                        </div>
+                      </Link>
                       <Badge className="ml-4">
                         <Award className="w-3 h-3 mr-1" />
                         $50

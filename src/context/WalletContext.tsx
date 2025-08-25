@@ -194,20 +194,42 @@ const WalletProviderFn = () => {
   }, []);
 
   const fetchQuestionById = async (id: number) => {
+    const payload: { paramsId: number } = {
+      paramsId: id,
+    };
     try {
-      const res = await fetch(`/api/questions/${id}`);
+      const res = await fetch("/api/questions/id", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
       if (!res.ok) throw new Error(`Failed: ${res.status}`);
 
       const { question } = (await res.json()) as {
         question: QuestionFetchedItems;
       };
-
       console.log("Fetched question:", question);
       return question;
     } catch (error) {
       console.error("Error fetching question:", error);
       return null;
     }
+
+    // try {
+    //   const res = await fetch(`/api/questions/${id}`);
+    //   if (!res.ok) throw new Error(`Failed: ${res.status}`);
+
+    //   const { question } = (await res.json()) as {
+    //     question: QuestionFetchedItems;
+    //   };
+
+    //   console.log("Fetched question:", question);
+    //   return question;
+    // } catch (error) {
+    //   console.error("Error fetching question:", error);
+    //   return null;
+    // }
   };
 
   useEffect(() => {

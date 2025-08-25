@@ -1,24 +1,28 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
+import { parseResults, sortAnswersByVotes } from "@/lib/utils";
+import { Abi } from "viem";
+
+import { publicClient } from "@/lib/viemConfig";
 import {
   BASEQUERY_CONTRACT_ABI,
   BASEQUERY_CONTRACT_ADDRESS,
 } from "@/lib/constants";
-import { publicClient } from "@/lib/viemConfig";
-import { QuestionFetchedItems } from "@/types/Question.type";
-import { Abi } from "viem";
-import { parseResults, sortAnswersByVotes } from "@/lib/utils";
 import { AnswerFetchedItems } from "@/types/Answers.type";
+import { QuestionFetchedItems } from "@/types/Question.type";
 
-export async function GET(
-  _req: NextRequest,
-  { params }: { params: { id: string } }
-): Promise<NextResponse> {
+export async function POST(request: NextRequest) {
+  const res: { paramsId: number } = await request.json();
+  const { paramsId } = res;
+  const questionId = BigInt(paramsId);
+
+  if (!questionId) {
+    return NextResponse.json(
+      { error: "Invalid QuestionID or AnswerID!" },
+      { status: 400 }
+    );
+  }
   try {
-    const { id: paramsId } = params;
-    const questionId = BigInt(paramsId);
-
     const data = await publicClient.readContract({
       address: BASEQUERY_CONTRACT_ADDRESS,
       abi: BASEQUERY_CONTRACT_ABI,
@@ -60,8 +64,6 @@ export async function GET(
       !Array.isArray(questiondata)
         ? questiondata
         : null;
-
-    const answers = [];
 
     const contracts = answerIds.map((id) => ({
       address: BASEQUERY_CONTRACT_ADDRESS as `0x${string}`,

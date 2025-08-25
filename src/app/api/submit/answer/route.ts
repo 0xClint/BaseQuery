@@ -3,17 +3,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "@/lib/auth";
 import { cdpClient } from "@/lib/cdpClient";
 import { hashEmail } from "@/lib/utils";
-import { createWalletClient, http, parseUnits } from "viem";
+import { createWalletClient, http } from "viem";
 import { toAccount } from "viem/accounts";
 import { baseSepolia } from "viem/chains";
 import { publicClient } from "@/lib/viemConfig";
 import {
   BASEQUERY_CONTRACT_ABI,
   BASEQUERY_CONTRACT_ADDRESS,
-  USDC_TOKEN_ABI,
-  USDC_TOKEN_ADDRESS,
+ 
 } from "@/lib/constants";
-import { pinataClient } from "@/lib/pinata";
 
 type answerType = {
   questionId: string | number;

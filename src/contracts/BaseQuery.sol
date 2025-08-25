@@ -200,7 +200,6 @@ contract BaseQuery is Ownable {
         uint256 reward = bountyAmount - fee;
 
         platformUSDCBalance += fee;
-        question.bountyAmount = 0;
 
         // Give reputation bonus for best answer
         reputationSystem.updateReputation(answer.provider, 10);
@@ -546,28 +545,17 @@ contract BaseQuery is Ownable {
         // Calculate individual answer's reward amount
         uint256 prize = 0;
         
-        // Check if this answer is selected as best answer first
-        if (questions[a.questionId].selectedAnswerId == answerId) {
-            // This answer was selected as best answer
-            if (questions[a.questionId].poolAmount > 0) {
-                // Pool question - prize was already distributed
-                prize = 0;
-            } else {
-                // Bounty question - prize was the bounty amount (already transferred)
-                // We can't return the current bountyAmount since it's 0 after transfer
-                // For now, we'll return 0 to indicate it was already paid
-                prize = 0;
-            }
+        if (questions[a.questionId].poolAmount > 0) {
+            // Pool question - always calculate the prize amount (whether distributed or not)
+            prize = calculateIndividualPoolReward(a.questionId, answerId);
         } else {
-            // Answer not selected yet
-            if (questions[a.questionId].poolAmount > 0) {
-                // Pool question - calculate potential reward
-                if (!questions[a.questionId].poolDistributed) {
-                    prize = calculateIndividualPoolReward(a.questionId, answerId);
-                }
-                // If pool already distributed, prize = 0
+            // Bounty question - check if this answer was selected
+            if (questions[a.questionId].selectedAnswerId == answerId) {
+                // This answer was selected as best answer
+                // For bounty questions, return the bounty amount that was earned
+                prize = questions[a.questionId].bountyAmount;
             }
-            // For bounty questions, prize = 0 until selected
+            // If not selected, prize = 0
         }
         
         return (

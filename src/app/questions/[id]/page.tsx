@@ -37,119 +37,6 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import Header from "@/components/Header";
 
-// Mock data - in real app this would come from database
-const questionData = {
-  id: "1",
-  title: "How to implement cross-chain token transfers using LayerZero?",
-  content: `I'm working on a DeFi project that needs to support token transfers across multiple chains (Ethereum, Polygon, Arbitrum). I've heard LayerZero is a good solution for this, but I'm not sure about the best practices and security considerations.
-
-Specifically, I need help with:
-1. Setting up the LayerZero endpoint configuration
-2. Implementing the OFT (Omnichain Fungible Token) standard
-3. Handling gas estimation for cross-chain transactions
-4. Security best practices to prevent common vulnerabilities
-
-Any code examples or detailed explanations would be greatly appreciated!`,
-  author: {
-    name: "Alex Chen",
-
-    reputation: 1250,
-  },
-  bounty: 50,
-  createdAt: "2 hours ago",
-  tags: ["solidity", "cross-chain", "layerzero", "defi"],
-  answers: [
-    {
-      id: "1",
-      content: `Great question! I've implemented LayerZero cross-chain transfers in several projects. Here's a comprehensive approach:
-
-## 1. LayerZero Endpoint Setup
-
-First, you'll need to configure the LayerZero endpoints for each chain:
-
-\`\`\`solidity
-// LayerZero endpoint addresses (mainnet)
-mapping(uint16 => address) public endpoints;
-
-constructor() {
-    endpoints[101] = 0x66A71Dcef29A0fFBDBE3c6a460a3B5BC225Cd675; // Ethereum
-    endpoints[109] = 0x3c2269811836af69497E5F486A85D7316753cf62; // Polygon
-    endpoints[110] = 0x3c2269811836af69497E5F486A85D7316753cf62; // Arbitrum
-}
-\`\`\`
-
-## 2. OFT Implementation
-
-Here's a basic OFT contract structure:
-
-\`\`\`solidity
-import "@layerzerolabs/solidity-examples/contracts/token/oft/OFT.sol";
-
-contract MyToken is OFT {
-    constructor(
-        string memory _name,
-        string memory _symbol,
-        address _lzEndpoint
-    ) OFT(_name, _symbol, _lzEndpoint) {}
-    
-    // Custom logic here
-}
-\`\`\`
-
-## 3. Gas Estimation
-
-Always estimate gas before sending:
-
-\`\`\`solidity
-function estimateSendFee(
-    uint16 _dstChainId,
-    bytes memory _toAddress,
-    uint _amount,
-    bool _useZro,
-    bytes memory _adapterParams
-) public view returns (uint nativeFee, uint zroFee) {
-    return lzEndpoint.estimateFees(
-        _dstChainId,
-        address(this),
-        _payload,
-        _useZro,
-        _adapterParams
-    );
-}
-\`\`\`
-
-## Security Best Practices
-
-1. **Always validate chain IDs** - Ensure you're sending to supported chains
-2. **Implement proper access controls** - Use OpenZeppelin's AccessControl
-3. **Add reentrancy guards** - Protect against reentrancy attacks
-4. **Validate payload data** - Never trust cross-chain data without validation
-
-Hope this helps! Let me know if you need clarification on any part.`,
-      author: {
-        name: "Sarah Kim",
-
-        reputation: 3420,
-      },
-      votes: 8,
-      createdAt: "1 hour ago",
-      isAccepted: true,
-    },
-    {
-      id: "2",
-      content: ``,
-      author: {
-        name: "Mike Rodriguez",
-
-        reputation: 2100,
-      },
-      votes: 3,
-      createdAt: "30 minutes ago",
-      isAccepted: false,
-    },
-  ],
-};
-
 const answerSchema = z.object({
   content: z
     .string()
@@ -246,11 +133,6 @@ export default function QuestionDetailPage() {
     ),
   } as const;
 
-  // const handleAnswer = async () => {
-  //   if (answerContent && data?.id) {
-  //
-  //   }
-  // };
   const form = useForm<AnswerFormData>({
     resolver: zodResolver(answerSchema),
     defaultValues: {
@@ -343,7 +225,7 @@ export default function QuestionDetailPage() {
                     <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
                       <div className="flex items-center gap-2">
                         <Avatar className="w-6 h-6">
-                          <AvatarImage src={"/placeholder.svg"} />
+                          {/* <AvatarImage src={"/placeholder.svg"} /> */}
                           <AvatarFallback>
                             <User className="w-3 h-3" />
                           </AvatarFallback>
@@ -397,7 +279,7 @@ export default function QuestionDetailPage() {
               {/* Answers Section */}
               <div className="mb-8">
                 <h3 className="text-xl font-semibold text-foreground mb-6">
-                  {questionData.answers.length} Answers
+                  {data?.answers.length} Answers
                 </h3>
 
                 <div className="space-y-6">
@@ -437,7 +319,7 @@ export default function QuestionDetailPage() {
                                 <div className="flex-1">
                                   <div className="flex items-center justify-center gap-2 ">
                                     <Avatar className="w-6 h-6">
-                                      <AvatarImage src={"/placeholder.svg"} />
+                                      {/* <AvatarImage src={"/placeholder.svg"} /> */}
                                       <AvatarFallback>
                                         <User className="w-3 h-3" />
                                       </AvatarFallback>
@@ -477,11 +359,19 @@ export default function QuestionDetailPage() {
                                   <ThumbsDown />
                                   {downvotes}
                                 </Button>
-                                {data.isPoolQuestion && data.isActive && (
+
+                                {data.isPoolQuestion ? (
                                   <Badge className="h-10 bg-white min-w-10 text-[12px]">
                                     {formatUnits(BigInt(amount), 6)}USDC
                                   </Badge>
+                                ) : (
+                                  amount > 0 && (
+                                    <Badge className="h-10 bg-white min-w-10 text-[12px]">
+                                      {formatUnits(BigInt(amount), 6)}USDC
+                                    </Badge>
+                                  )
                                 )}
+
                                 {!data.isPoolQuestion &&
                                   data.isActive &&
                                   evmAddress.toLocaleLowerCase() ==
@@ -595,6 +485,7 @@ export default function QuestionDetailPage() {
                       )}
                     </div>
                     {data &&
+                      data.isPoolQuestion &&
                       evmAddress.toLocaleLowerCase() ==
                         data.owner.toLocaleLowerCase() &&
                       data.isActive &&
