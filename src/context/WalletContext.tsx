@@ -1,9 +1,7 @@
 "use client";
-// import { cdpClient } from "@/lib/cdpClient";
-import {
-  STORAGE_CONTRACT_ABI,
-  STORAGE_CONTRACT_ADDRESS,
-} from "@/lib/constants";
+import { questionType, selectBestAnswerType, voteType } from "@/types/submit";
+import { INDEXER_ENDPOINT, INDEXER_HEADERS } from "@/lib/constants";
+import { QuestionFetchedItems, QuestionItem } from "@/types/Question.type";
 import { useSession } from "next-auth/react";
 import {
   createContext,
@@ -25,6 +23,7 @@ const WalletProviderFn = () => {
   const [evmAddress, setEvmAddress] = useState<`0x${string}`>("0x");
   const [accountId, setAccountId] = useState<string>();
   const [balances, setBalances] = useState<string>("0.00");
+  const [questionList, setQuestionList] = useState<QuestionItem[]>([]);
 
   const fetchEvmAddress = useCallback(async () => {
     console.log(session);
@@ -35,11 +34,6 @@ const WalletProviderFn = () => {
       setEvmAddress(address);
     }
   }, [session]);
-
-  // const getAccounts = async () => {
-  //   let response = await cdpClient.evm.listAccounts();
-  //   console.log(response);
-  // };
 
   const refreshBalance = useCallback(async () => {
     if (!evmAddress) return;
@@ -77,54 +71,145 @@ const WalletProviderFn = () => {
     }
   }, [evmAddress, refreshBalance]);
 
-  const createQuestion = async () => {
-    // const encodedTransferCall = encodeFunctionData({
-    //   abi: STORAGE_CONTRACT_ABI,
-    //   functionName: "store",
-    //   args: [1000],
-    // });
-
-    if (!evmAddress) return;
-
-    const res = await fetch(`/api/temp`);
-    if (res.ok) {
-      const { address } = await res.json();
+  const createQuestion = async (
+    questionData: QuestionItem,
+    bountyAmount: string,
+    poolDuration: number
+  ) => {
+    const useAsPool = poolDuration > 0;
+    const payload: questionType = {
+      question: questionData,
+      bountyAmount,
+      poolDuration,
+      useAsPool,
+    };
+    try {
+      const res = await fetch("/api/submit/question", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } catch (error) {
+      console.log(error);
     }
-    // const txResult = await cdpClient.evm.sendTransaction({
-    //   address: evmAddress,
-    //   network: "base-sepolia",
-    //   transaction: {
-    //     to: STORAGE_CONTRACT_ADDRESS, // recipient address
-    //     // value: parseEther("0.000001"), // sending 0.000001 ETH
-    //     data: encodedTransferCall,
-    //   },
-    // });
-    // console.log(txResult);
-    // const encodedTransferCall = encodeFunctionData({
-    //   abi: BASEQUERY_CONTRACT_ABI,
-    //   functionName: "createQuestion",
-    //   args: ["ipfs hash", 1000, 0, false],
-    // });
-    // const txResult = await cdpClient.evm.sendTransaction({
-    //   address: evmAddress,
-    //   network: "base-sepolia",
-    //   transaction: {
-    //     to: BASEQUERY_CONTRACT_ADDRESS, // recipient address
-    //     // value: parseEther("0.000001"), // sending 0.000001 ETH
-    //     data: encodedTransferCall,
-    //   },
-    // });
-    // console.log(txResult);
   };
+
+  const createAnswer = async (questionId: number, answer: string) => {
+    const payload = {
+      questionId,
+      answer,
+    };
+    try {
+      const res = await fetch("/api/submit/answer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const upVote = async (
+    questionId: number,
+    answerId: number,
+    isUpvote: boolean
+  ) => {
+    const payload: voteType = {
+      questionId,
+      answerId,
+      isUpvote,
+    };
+    try {
+      const res = await fetch("/api/submit/vote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const selectBestAnswer = async (questionId: number, answerId: number) => {
+    const payload: selectBestAnswerType = {
+      questionId,
+      answerId,
+    };
+    try {
+      const res = await fetch("/api/submit/select", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const withdrawBounty = async (questionId: number) => {
+    try {
+      const res = await fetch("/api/bounty/withdraw", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ questionId }),
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const fetchQuestions = useCallback(async () => {
+    try {
+      const res = await fetch("/api/questions");
+      if (!res.ok) throw new Error(`Failed to fetch questions: ${res.status}`);
+
+      const { questions } = (await res.json()) as { questions: QuestionItem[] };
+      console.log(questions);
+      // setQuestionList(questions);
+    } catch (error) {
+      console.error("Error fetching questions:", error);
+      setQuestionList([]);
+    }
+  }, []);
+
+  const fetchQuestionById = async (id: number) => {
+    try {
+      const res = await fetch(`/api/questions/${id}`);
+      if (!res.ok) throw new Error(`Failed: ${res.status}`);
+
+      const { question } = (await res.json()) as {
+        question: QuestionFetchedItems;
+      };
+
+      console.log("Fetched question:", question);
+      return question;
+    } catch (error) {
+      console.error("Error fetching question:", error);
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    if (evmAddress) {
+      fetchQuestions();
+    }
+  }, [evmAddress, fetchQuestions]);
+
   return {
     evmAddress,
     accountId,
     fetchEvmAddress,
     createQuestion,
-    // getAccounts,
+    createAnswer,
+    selectBestAnswer,
+    withdrawBounty,
+    questionList,
     requestFaucet,
     refreshBalance,
     balances,
+    fetchQuestions,
+    upVote,
+    fetchQuestionById,
   };
 };
 

@@ -14,14 +14,75 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Plus, X, HelpCircle, Award } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { ArrowLeft, Plus, X, HelpCircle, Award, Calendar } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { useWallet } from "@/context/WalletContext";
+import { QuestionItem } from "@/types/Question.type";
+import { toast } from "sonner";
+import Loader from "@/components/Loader";
+
+const questionFormSchema = z.object({
+  title: z
+    .string()
+    .min(10, "Title must be at least 10 characters")
+    .max(200, "Title must be less than 200 characters"),
+  content: z
+    .string()
+    .min(1, "Question details must be at least 1 characters")
+    .max(5000, "Question details must be less than 5000 characters"),
+  bountyAmount: z
+    .string()
+    .optional()
+    .refine((val) => {
+      if (!val || val.trim() === "") return true; // Allow empty
+      const num = parseFloat(val);
+      return !isNaN(num) && num >= 0;
+    }, "Bounty amount must be a positive number"),
+  bountyDeadline: z.string().optional(),
+  bountyType: z.enum(["single", "pool"]).optional(),
+});
+
+type QuestionFormData = z.infer<typeof questionFormSchema>;
 
 export default function AskQuestionPage() {
   const [tags, setTags] = useState<string[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [success, setSuccess] = useState<boolean>(false);
+
+  const { createQuestion } = useWallet();
   const [tagInput, setTagInput] = useState("");
-  const [bountyAmount, setBountyAmount] = useState("");
+
+  const form = useForm<QuestionFormData>({
+    resolver: zodResolver(questionFormSchema),
+    defaultValues: {
+      title: "",
+      content: "",
+      bountyAmount: "",
+      bountyDeadline: "",
+      bountyType: "single",
+    },
+  });
 
   const addTag = () => {
     if (tagInput.trim() && !tags.includes(tagInput.trim()) && tags.length < 5) {
@@ -41,8 +102,90 @@ export default function AskQuestionPage() {
     }
   };
 
+  const onSubmit = async (data: QuestionFormData) => {
+    console.log("Form submission started", data);
+
+    if (tags.length === 0) {
+      alert("Please add at least one tag");
+      return;
+    }
+
+    // Validate pool bounty requires deadline
+    if (
+      data.bountyType === "pool" &&
+      (!data.bountyDeadline || data.bountyDeadline.trim() === "")
+    ) {
+      alert("Pool bounties require a deadline. Please select a deadline.");
+      return;
+    }
+
+    // Validate deadline is in the future (at least 24 hours)
+    if (data.bountyDeadline && data.bountyDeadline.trim() !== "") {
+      const selectedDate = new Date(data.bountyDeadline);
+      const now = new Date();
+      const minDate = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours from now
+
+      if (selectedDate <= minDate) {
+        alert("Bounty deadline must be at least 24 hours in the future.");
+        return;
+      }
+    }
+
+    try {
+      setLoading(true);
+      const questionData: QuestionItem = {
+        title: data.title,
+        content: data.content,
+        tags,
+      };
+      const bountyAmount =
+        data.bountyAmount && data.bountyAmount.trim() !== ""
+          ? parseFloat(data.bountyAmount)
+          : 0;
+
+      const poolDuration =
+        data.bountyType === "pool"
+          ? data.bountyDeadline
+            ? Math.floor(
+                (new Date(data.bountyDeadline).getTime() - Date.now()) / 1000
+              )
+            : 0
+          : 0;
+      await createQuestion(questionData, bountyAmount.toString(), poolDuration);
+      setSuccess(true);
+      console.log("Form submitted successfully:", data);
+      toast.success("Question submitted successfully!");
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
+      <Dialog open={success} onOpenChange={setSuccess}>
+        <form>
+          <DialogContent
+            className="sm:max-w-[425px]"
+            showCloseButton={false}
+            preventOutsideClose={true}
+          >
+            <DialogHeader>
+              <DialogTitle>Question creation Success</DialogTitle>
+              <DialogDescription>
+                Question has been created successfully
+              </DialogDescription>
+            </DialogHeader>
+
+            <DialogFooter>
+              <Link href={"/"}>
+                <Button type="submit">Home</Button>
+              </Link>
+            </DialogFooter>
+          </DialogContent>
+        </form>
+      </Dialog>
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -67,7 +210,7 @@ export default function AskQuestionPage() {
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-foreground mb-2">
             Ask a Question
@@ -79,127 +222,191 @@ export default function AskQuestionPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Form */}
-          <div className="lg:col-span-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Question Details</CardTitle>
-                <CardDescription>
-                  Provide clear, specific details to help the community
-                  understand your question.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Title */}
-                <div className="space-y-2">
-                  <Label htmlFor="title">Question Title *</Label>
-                  <Input
-                    id="title"
-                    placeholder="e.g., How to implement cross-chain token transfers using LayerZero?"
-                    className=""
-                  />
-                  <p className="text-sm text-muted-foreground">
-                   { `Be specific and imagine you're asking a question to another
-                    person.`}
-                  </p>
-                </div>
-
-                {/* Content */}
-                <div className="space-y-2">
-                  <Label htmlFor="content">Question Details *</Label>
-                  <Textarea
-                    id="content"
-                    placeholder="Describe your question in detail. Include what you've tried, what you expect to happen, and what actually happens. Code examples are helpful!"
-                    className="min-h-[300px] bg-white"
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    {`Include relevant code, error messages, and what you've
-                    already tried.`}
-                  </p>
-                </div>
-
-                {/* Tags */}
-                <div className="space-y-2">
-                  <Label htmlFor="tags">Tags *</Label>
+          {loading ? (
+            <Loader className="lg:col-span-2" />
+          ) : (
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="lg:col-span-2"
+            >
+              <Card>
+                <CardHeader>
+                  <CardTitle>Question Details</CardTitle>
+                  <CardDescription>
+                    Provide clear, specific details to help the community
+                    understand your question.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
                   <div className="space-y-2">
-                    <div className="flex flex-wrap gap-2 mb-2">
-                      {tags.map((tag) => (
-                        <Badge
-                          key={tag}
-                          variant="secondary"
-                          className="flex items-center gap-1"
-                        >
-                          {tag}
-                          <button
-                            onClick={() => removeTag(tag)}
-                            className="ml-1 hover:text-destructive"
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
-                        </Badge>
-                      ))}
-                    </div>
-                    <div className="flex gap-2">
-                      <Input
-                        id="tags"
-                        value={tagInput}
-                        onChange={(e) => setTagInput(e.target.value)}
-                        onKeyPress={handleTagKeyPress}
-                        placeholder="Add tags (e.g., solidity, defi, ethereum)"
-                        disabled={tags.length >= 5}
-                      />
-                      <Button
-                        type="button"
-                        size={"icon"} // variant="outline"
-                        onClick={addTag}
-                        disabled={!tagInput.trim() || tags.length >= 5}
-                      >
-                        <Plus className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Add up to 5 tags to help categorize your question. Press
-                    Enter or comma to add.
-                  </p>
-                </div>
-
-                {/* Bounty */}
-                <div className="space-y-2">
-                  <Label htmlFor="bounty">Bounty Amount (Optional)</Label>
-                  <div className="flex items-center gap-2">
-                    <span className="text-muted-foreground">$</span>
+                    <Label htmlFor="title">Question Title *</Label>
                     <Input
-                      id="bounty"
-                      type="number"
-                      value={bountyAmount}
-                      onChange={(e) => setBountyAmount(e.target.value)}
-                      placeholder="0"
-                      min="0"
-                      step="1"
-                      className="max-w-32"
+                      id="title"
+                      required
+                      placeholder="e.g., How to implement cross-chain token transfers using LayerZero?"
+                      className=""
+                      {...form.register("title")}
                     />
-                    <Award className="w-4 h-4 text-muted-foreground" />
+                    {form.formState.errors.title && (
+                      <p className="text-sm text-destructive">
+                        {form.formState.errors.title.message}
+                      </p>
+                    )}
+                    <p className="text-sm text-muted-foreground">
+                      {`Be specific and imagine you're asking a question to another
+                      person.`}
+                    </p>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    Offer a bounty to incentivize high-quality answers. You can
-                    add or increase the bounty later.
-                  </p>
-                </div>
 
-                {/* Submit */}
-                <div className="flex gap-4 pt-4">
-                  <Button size="lg" className="flex-1">
-                    Post Question
-                  </Button>
-                  <Button variant="neutral" size="lg">
-                    Save Draft
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="content">Question Details *</Label>
+                    <Textarea
+                      id="content"
+                      required
+                      placeholder="Describe your question in detail. Include what you've tried, what you expect to happen, and what actually happens. Code examples are helpful! You can use Markdown formatting."
+                      className="min-h-[300px] bg-white"
+                      {...form.register("content")}
+                    />
+                    {form.formState.errors.content && (
+                      <p className="text-sm text-destructive">
+                        {form.formState.errors.content.message}
+                      </p>
+                    )}
+                    <p className="text-sm text-muted-foreground">
+                      {`Include relevant code, error messages, and what you've
+                    already tried.`}
+                    </p>
+                  </div>
 
+                  <div className="space-y-2">
+                    <Label htmlFor="tags">Tags *</Label>
+                    <div className="space-y-2">
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        {tags.map((tag) => (
+                          <Badge
+                            key={tag}
+                            variant="secondary"
+                            className="flex items-center gap-1"
+                          >
+                            {tag}
+                            <button
+                              type="button"
+                              onClick={() => removeTag(tag)}
+                              className="ml-1 hover:text-destructive"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </Badge>
+                        ))}
+                      </div>
+                      <div className="flex gap-2">
+                        <Input
+                          id="tags"
+                          value={tagInput}
+                          onChange={(e) => setTagInput(e.target.value)}
+                          onKeyPress={handleTagKeyPress}
+                          placeholder="Add tags (e.g., solidity, defi, ethereum)"
+                          disabled={tags.length >= 5}
+                        />
+                        <Button
+                          type="button"
+                          size={"icon"} // variant="outline"
+                          onClick={addTag}
+                          disabled={!tagInput.trim() || tags.length >= 5}
+                        >
+                          <Plus className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Add up to 5 tags to help categorize your question. Press
+                      Enter or comma to add.
+                    </p>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="bounty">Bounty Amount (Optional)</Label>
+                      <div className="flex items-center gap-2">
+                        <span className="text-muted-foreground">$</span>
+                        <Input
+                          id="bounty"
+                          type="number"
+                          placeholder="0.00"
+                          min="0"
+                          step="0.01"
+                          className="max-w-32"
+                          {...form.register("bountyAmount")}
+                        />
+                        <Award className="w-4 h-4 text-muted-foreground" />
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Offer a bounty to incentivize high-quality answers. You
+                        can add or increase the bounty later.
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="bountyType">Bounty Type</Label>
+                      <Select
+                        value={form.watch("bountyType")}
+                        onValueChange={(value) =>
+                          form.setValue(
+                            "bountyType",
+                            value as "single" | "pool"
+                          )
+                        }
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select bounty type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="single">Single Bounty</SelectItem>
+                          <SelectItem value="pool">Pool Bounty</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <p className="text-sm text-muted-foreground">
+                        Single bounty goes to the best answer. Pool bounty can
+                        be split among multiple contributors.
+                      </p>
+                    </div>
+                    {form.watch("bountyType") === "pool" && (
+                      <div className="space-y-2">
+                        <Label htmlFor="bountyDeadline">
+                          Bounty Deadline *
+                        </Label>
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4 text-muted-foreground" />
+                          <Input
+                            id="bountyDeadline"
+                            type="date"
+                            min={
+                              new Date(Date.now() + 24 * 60 * 60 * 1000)
+                                .toISOString()
+                                .split("T")[0]
+                            }
+                            className="flex-1"
+                            required
+                            {...form.register("bountyDeadline")}
+                          />
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Pool bounties require a deadline. Must be at least 24
+                          hours in the future.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex gap-4 pt-4">
+                    <Button type="submit" size="lg" className="flex-1">
+                      Post Question
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </form>
+          )}
           {/* Sidebar */}
           <div className="lg:col-span-1">
             <div className="space-y-6">

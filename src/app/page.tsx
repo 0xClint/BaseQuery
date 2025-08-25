@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,8 +12,82 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Plus, TrendingUp, Award, Users, Bot } from "lucide-react";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
+import { useWallet } from "@/context/WalletContext";
+import axios from "axios";
+import { QuestionItem } from "@/types/Question.type";
+
+const dummyQuestions = [
+  {
+    id: 1,
+    title: "What is Solidity?",
+    content: "Explain the basics of Solidity and its role in smart contracts.",
+    tags: ["solidity", "smart-contracts"],
+  },
+  {
+    id: 2,
+    title: "What is EVM?",
+    content:
+      "Tell me about Ethereum Virtual Machine and how it executes smart contracts.",
+    tags: ["evm", "ethereum"],
+  },
+  {
+    id: 3,
+    title: "Difference between ERC20 and ERC721?",
+    content: "Explain how ERC20 tokens differ from ERC721 tokens.",
+    tags: ["tokens", "erc20", "erc721"],
+  },
+  {
+    id: 4,
+    title: "What is Gas in Ethereum?",
+    content:
+      "Describe what gas is and why it is needed in Ethereum transactions.",
+    tags: ["gas", "ethereum"],
+  },
+  {
+    id: 5,
+    title: "What is a Layer 2 solution?",
+    content:
+      "Discuss the purpose of Layer 2 scaling solutions like Optimism or Arbitrum.",
+    tags: ["layer2", "scaling"],
+  },
+  {
+    id: 6,
+    title: "What is Proof of Stake?",
+    content:
+      "Explain the Proof of Stake consensus mechanism and its advantages.",
+    tags: ["consensus", "pos"],
+  },
+  {
+    id: 7,
+    title: "What is Web3?",
+    content: "Explain the concept of Web3 and how it differs from Web2.",
+    tags: ["web3", "blockchain"],
+  },
+  {
+    id: 8,
+    title: "What is a DAO?",
+    content:
+      "Describe what a Decentralized Autonomous Organization is and its purpose.",
+    tags: ["dao", "governance"],
+  },
+  {
+    id: 9,
+    title: "What is IPFS?",
+    content:
+      "Explain InterPlanetary File System and its role in decentralized storage.",
+    tags: ["ipfs", "storage"],
+  },
+  {
+    id: 10,
+    title: "What is a Rollup?",
+    content: "Describe rollups and how they help in scaling Ethereum.",
+    tags: ["rollup", "scaling"],
+  },
+];
 
 export default function Home() {
+  // const { questionList } = useWallet();
+  // console.log(questionList);
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -36,10 +111,7 @@ export default function Home() {
               placeholder="Search questions or ask something new..."
               className="pl-12 pr-4 py-6 text-lg h-12"
             />
-            <Button
-              className="absolute right-2 top-1/9"
-              size="sm"
-            >
+            <Button className="absolute right-2 top-1/9" size="sm">
               Search
             </Button>
           </div>
@@ -79,6 +151,42 @@ export default function Home() {
 
           <div className="grid gap-6">
             {/* Sample Question Cards */}
+
+            {dummyQuestions.map(async ({ id, title, content, tags }) => {
+              return (
+                <Card className="hover:shadow-md transition-shadow" key={id}>
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <CardTitle className="text-lg mb-2">{title}</CardTitle>
+                        <CardDescription>{content}</CardDescription>
+                      </div>
+                      <Badge className="ml-4">
+                        <Award className="w-3 h-3 mr-1" />
+                        $50
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                      <div className="flex items-center gap-4">
+                        <span className="flex items-center gap-1">
+                          <Users className="w-4 h-4" />5 answers
+                        </span>
+                        <span>Asked 2 hours ago</span>
+                      </div>
+                      <div className="flex gap-2">
+                        {tags.map((item) => (
+                          <Badge variant="secondary" key={item}>
+                            {item}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
             <Card className="hover:shadow-md transition-shadow">
               <CardHeader>
                 <div className="flex items-start justify-between">

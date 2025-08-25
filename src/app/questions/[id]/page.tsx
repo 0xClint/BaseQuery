@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,6 +22,12 @@ import {
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useParams } from "next/navigation";
+import { useWallet } from "@/context/WalletContext";
+import { useEffect, useState } from "react";
+import { QuestionFetchedItems } from "@/types/Question.type";
+import Loader from "@/components/Loader";
+import { formatUnits } from "viem";
 
 // Mock data - in real app this would come from database
 const questionData = {
@@ -37,7 +44,7 @@ Specifically, I need help with:
 Any code examples or detailed explanations would be greatly appreciated!`,
   author: {
     name: "Alex Chen",
-    avatar: "/developer-working.png",
+
     reputation: 1250,
   },
   bounty: 50,
@@ -113,7 +120,7 @@ function estimateSendFee(
 Hope this helps! Let me know if you need clarification on any part.`,
       author: {
         name: "Sarah Kim",
-        avatar: "/blockchain-expert.png",
+
         reputation: 3420,
       },
       votes: 8,
@@ -125,7 +132,7 @@ Hope this helps! Let me know if you need clarification on any part.`,
       content: ``,
       author: {
         name: "Mike Rodriguez",
-        avatar: "/placeholder-j5fto.png",
+
         reputation: 2100,
       },
       votes: 3,
@@ -135,11 +142,29 @@ Hope this helps! Let me know if you need clarification on any part.`,
   ],
 };
 
-export default function QuestionDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default function QuestionDetailPage() {
+  const { id } = useParams();
+  const [data, setData] = useState<QuestionFetchedItems | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const { fetchQuestionById } = useWallet();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (id) {
+        setLoading(true);
+        try {
+          setData(await fetchQuestionById(Number(id)));
+        } catch (error) {
+          console.error(error);
+          setData(null);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    fetchData();
+  }, [id]);
+
   const rewriteGithubBlobToRaw = (url: string) => {
     try {
       const parsed = new URL(url);
@@ -183,10 +208,7 @@ export default function QuestionDetailPage({
     ),
     code: ({ inline, className, children, ...props }: any) => (
       <code
-        className={
-          "rounded px-1.5 py-0.5 text-white " +
-          (className || "")
-        }
+        className={"rounded px-1.5 py-0.5 text-white " + (className || "")}
         {...props}
       >
         {children}
@@ -195,7 +217,6 @@ export default function QuestionDetailPage({
   } as const;
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
@@ -212,102 +233,111 @@ export default function QuestionDetailPage({
                     C
                   </span>
                 </div>
-                <h1 className="text-xl font-bold text-foreground">
-                  BaseQuery
-                </h1>
+                <h1 className="text-xl font-bold text-foreground">BaseQuery</h1>
               </div>
             </div>
           </div>
         </div>
       </header>
-
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-3">
-            {/* Question */}
-            <Card className="mb-8">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="text-2xl mb-4">
-                      {questionData.title}
-                    </CardTitle>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-                      <div className="flex items-center gap-2">
-                        <Avatar className="w-6 h-6">
-                          <AvatarImage
-                            src={
-                              questionData.author.avatar || "/placeholder.svg"
-                            }
-                          />
-                          <AvatarFallback>
-                            <User className="w-3 h-3" />
-                          </AvatarFallback>
-                        </Avatar>
-                        <span>{questionData.author.name}</span>
-                        <span>•</span>
-                        <span>{questionData.author.reputation} rep</span>
+      {loading ? (
+        <div className="w-full h-screen flex-center">
+          <Loader />
+        </div>
+      ) : (
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            {/* Main Content */}
+            <div className="lg:col-span-3">
+              {/* Question */}
+              <Card className="mb-8">
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <CardTitle className="text-2xl mb-4">
+                        {data?.question?.title}
+                      </CardTitle>
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
+                        <div className="flex items-center gap-2">
+                          <Avatar className="w-6 h-6">
+                            <AvatarImage src={"/placeholder.svg"} />
+                            <AvatarFallback>
+                              <User className="w-3 h-3" />
+                            </AvatarFallback>
+                          </Avatar>
+                          <span>{questionData.author.name}</span>
+                          <span>•</span>
+                          <span>{questionData.author.reputation} rep</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-4 h-4" />
+                          <span>{data?.timestamp}</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-4 h-4" />
-                        <span>{questionData.createdAt}</span>
+                      <div className="flex gap-2 mb-4">
+                        {data &&
+                          data.question &&
+                          data?.question.tags.map((tag) => (
+                            <Badge key={tag} variant="secondary">
+                              {tag}
+                            </Badge>
+                          ))}
                       </div>
                     </div>
-                    <div className="flex gap-2 mb-4">
-                      {questionData.tags.map((tag) => (
-                        <Badge key={tag} variant="secondary">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
+                    <Badge className="ml-4 text-2xl font-semibold">
+                      $
+                      {formatUnits(
+                        BigInt(
+                          data?.isPoolQuestion
+                            ? data.poolAmount ?? 0
+                            : data?.bountyAmount ?? 0
+                        ),
+                        6
+                      )}
+                      USDC
+                    </Badge>
                   </div>
-                  <Badge className="ml-4">
-                    <Award className="w-4 h-4 mr-1" />${questionData.bounty}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="prose prose-sm max-w-none text-foreground prose-li:marker:text-black prose-hr:border-black">
-                  <ReactMarkdown
-                    remarkPlugins={[remarkGfm]}
-                    components={markdownComponents}
-                  >
-                    {questionData.content}
-                  </ReactMarkdown>
-                </div>
-              </CardContent>
-            </Card>
+                </CardHeader>
+                <CardContent>
+                  <div className="prose prose-sm max-w-none text-foreground prose-li:marker:text-black prose-hr:border-black">
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      components={markdownComponents}
+                    >
+                      {data?.question?.content}
+                    </ReactMarkdown>
+                  </div>
+                </CardContent>
+              </Card>
 
-            {/* Answers Section */}
-            <div className="mb-8">
-              <h3 className="text-xl font-semibold text-foreground mb-6">
-                {questionData.answers.length} Answers
-              </h3>
+              {/* Answers Section */}
+              <div className="mb-8">
+                <h3 className="text-xl font-semibold text-foreground mb-6">
+                  {questionData.answers.length} Answers
+                </h3>
 
-              <div className="space-y-6">
-                {questionData.answers.map((answer) => (
-                  <Card
-                    key={answer.id}
-                    className={answer.isAccepted ? "border-primary" : ""}
-                  >
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className="flex flex-col items-center gap-2">
-                            <Button size="icon" className="p-1">
-                              <ThumbsUp className="w-4 h-4" />
-                            </Button>
-                            <div className="text-sm h-7 min-w-7 px-2 bg-white font-medium border-2 rounded-[3px] mt-1 flex-center">
-                              {answer.votes}
+                <div className="space-y-6">
+                  {questionData.answers.map((answer) => (
+                    <Card
+                      key={answer.id}
+                      className={answer.isAccepted ? "border-primary" : ""}
+                    >
+                      <CardHeader>
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-4">
+                            <div className="flex flex-col items-center gap-2">
+                              <Button size="icon" className="p-1">
+                                <ThumbsUp className="w-4 h-4" />
+                              </Button>
+                              <div className="text-sm h-7 min-w-7 px-2 bg-white font-medium border-2 rounded-[3px] mt-1 flex-center">
+                                {answer.votes}
+                              </div>
+                              <Button size="icon" className="p-1">
+                                <ThumbsDown className="w-4 h-4" />
+                              </Button>
                             </div>
-                            <Button size="icon" className="p-1">
-                              <ThumbsDown className="w-4 h-4" />
-                            </Button>
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <Avatar className="w-6 h-6">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                {/* <Avatar className="w-6 h-6">
                                 <AvatarImage
                                   src={
                                     answer.author.avatar || "/placeholder.svg"
@@ -316,137 +346,142 @@ export default function QuestionDetailPage({
                                 <AvatarFallback>
                                   <User className="w-3 h-3" />
                                 </AvatarFallback>
-                              </Avatar>
-                              <span className="text-sm font-medium">
-                                {answer.author.name}
-                              </span>
-                              <span className="text-sm text-muted-foreground">
-                                {answer.author.reputation} rep
-                              </span>
-                              <span className="text-sm text-muted-foreground">
-                                •
-                              </span>
-                              <span className="text-sm text-muted-foreground">
-                                {answer.createdAt}
-                              </span>
+                              </Avatar> */}
+                                <span className="text-sm font-medium">
+                                  {answer.author.name}
+                                </span>
+                                <span className="text-sm text-muted-foreground">
+                                  {answer.author.reputation} rep
+                                </span>
+                                <span className="text-sm text-muted-foreground">
+                                  •
+                                </span>
+                                <span className="text-sm text-muted-foreground">
+                                  {answer.createdAt}
+                                </span>
+                              </div>
                             </div>
                           </div>
+                          {answer.isAccepted && (
+                            <Badge variant="green">✓ Accepted</Badge>
+                          )}
                         </div>
-                        {answer.isAccepted && (
-                          <Badge variant="green">✓ Accepted</Badge>
-                        )}
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="prose prose-sm max-w-none text-foreground prose-li:marker:text-black prose-hr:border-black">
-                        <ReactMarkdown
-                          remarkPlugins={[remarkGfm]}
-                          components={markdownComponents}
-                        >
-                          {answer.content}
-                        </ReactMarkdown>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      </CardHeader>
+                      <CardContent>
+                        <div className="prose prose-sm max-w-none text-foreground prose-li:marker:text-black prose-hr:border-black">
+                          <ReactMarkdown
+                            remarkPlugins={[remarkGfm]}
+                            components={markdownComponents}
+                          >
+                            {answer.content}
+                          </ReactMarkdown>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
               </div>
+
+              {/* Answer Form */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Your Answer</CardTitle>
+                  <CardDescription>
+                    Share your knowledge and help the community. Quality answers
+                    may earn bounty rewards.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <Textarea
+                      placeholder="Write your answer here... You can use Markdown formatting."
+                      className="min-h-[200px] bg-white"
+                    />
+                    <div className="flex justify-between items-center">
+                      <p className="text-sm text-muted-foreground">
+                        By posting your answer, you agree to our community
+                        guidelines.
+                      </p>
+                      <Button>Post Answer</Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
-            {/* Answer Form */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Your Answer</CardTitle>
-                <CardDescription>
-                  Share your knowledge and help the community. Quality answers
-                  may earn bounty rewards.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <Textarea
-                    placeholder="Write your answer here... You can use Markdown formatting."
-                    className="min-h-[200px] bg-white"
-                  />
-                  <div className="flex justify-between items-center">
-                    <p className="text-sm text-muted-foreground">
-                      By posting your answer, you agree to our community
-                      guidelines.
-                    </p>
-                    <Button>Post Answer</Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+            {/* Sidebar */}
+            <div className="lg:col-span-1">
+              <div className="space-y-6">
+                {/* Question Stats */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Question Stats</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Answers</span>
+                      <span className="font-medium">
+                        {data?.answerIds.length}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Bounty</span>
+                      <span className="font-medium text-primary">
+                        $
+                        {formatUnits(
+                          BigInt(
+                            data?.isPoolQuestion
+                              ? data.poolAmount ?? 0
+                              : data?.bountyAmount ?? 0
+                          ),
+                          6
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Status</span>
+                      <Badge variant="active" className="">
+                        Active
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
 
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="space-y-6">
-              {/* Question Stats */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Question Stats</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Views</span>
-                    <span className="font-medium">1,247</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Answers</span>
-                    <span className="font-medium">
-                      {questionData.answers.length}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Bounty</span>
-                    <span className="font-medium text-primary">
-                      ${questionData.bounty}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Status</span>
-                    <Badge variant="secondary" className="text-green-600">
-                      Active
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Related Questions */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Related Questions</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="space-y-3">
-                    <a
-                      href="#"
-                      className="block text-sm hover:text-primary transition-colors"
-                    >
-                      Best practices for DeFi protocol security audits?
-                    </a>
-                    <Separator />
-                    <a
-                      href="#"
-                      className="block text-sm hover:text-primary transition-colors"
-                    >
-                      Gas optimization techniques for NFT contracts?
-                    </a>
-                    <Separator />
-                    <a
-                      href="#"
-                      className="block text-sm hover:text-primary transition-colors"
-                    >
-                      How to handle MEV protection in AMM pools?
-                    </a>
-                  </div>
-                </CardContent>
-              </Card>
+                {/* Related Questions */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Related Questions</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="space-y-3">
+                      <a
+                        href="#"
+                        className="block text-sm hover:text-primary transition-colors"
+                      >
+                        Best practices for DeFi protocol security audits?
+                      </a>
+                      <Separator />
+                      <a
+                        href="#"
+                        className="block text-sm hover:text-primary transition-colors"
+                      >
+                        Gas optimization techniques for NFT contracts?
+                      </a>
+                      <Separator />
+                      <a
+                        href="#"
+                        className="block text-sm hover:text-primary transition-colors"
+                      >
+                        How to handle MEV protection in AMM pools?
+                      </a>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

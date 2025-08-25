@@ -44,6 +44,7 @@ contract StackExchange is Ownable {
         uint256[] answerIds;
         bool poolDistributed;
         bool isActive;
+        uint256 timestamp;       // Question creation timestamp
     }
 
     struct Answer {
@@ -133,7 +134,8 @@ contract StackExchange is Ownable {
             selectedAnswerId: 0,
             answerIds: new uint256[](0),
             poolDistributed: false,
-            isActive: true
+            isActive: true,
+            timestamp: block.timestamp
         });
 
         // Give reputation for asking question
@@ -440,15 +442,64 @@ contract StackExchange is Ownable {
         }
     }
 
-    // View functions
-    function getQuestion(uint256 questionId) external view returns (Question memory) {
-        if (questionId == 0 || questionId > questionCounter) revert QuestionNotFound();
-        return questions[questionId];
+    // View functions - Enhanced and consolidated
+    function getQuestion(uint256 questionId) external view returns (
+        uint256 id,
+        address owner,
+        string memory ipfsHash,
+        uint256 bountyAmount,
+        uint256 poolAmount,
+        uint256 poolEndTime,
+        uint256 selectedAnswerId,
+        uint256[] memory answerIds,
+        bool isActive,
+        bool isPoolQuestion,
+        uint256 timestamp
+    ) {
+        if (questionId == 0 || questionCounter < questionId) revert QuestionNotFound();
+        
+        Question storage q = questions[questionId];
+        
+        return (
+            questionId,
+            q.owner,
+            q.ipfsHash,
+            q.bountyAmount,
+            q.poolAmount,
+            q.poolEndTime,
+            q.selectedAnswerId,
+            q.answerIds,
+            q.isActive,
+            q.poolAmount > 0,
+            q.timestamp
+        );
     }
 
-    function getAnswer(uint256 answerId) external view returns (Answer memory) {
+    function getAnswer(uint256 answerId) external view returns (
+        uint256 id,
+        uint256 questionId,
+        address provider,
+        string memory ipfsHash,
+        uint256 timestamp,
+        uint256 upvotes,
+        uint256 downvotes
+    ) {
         if (answerId == 0 || answerId > answerCounter) revert AnswerNotFound();
-        return answers[answerId];
+        
+        Answer storage a = answers[answerId];
+        (uint256 upvoteCount, uint256 downvoteCount) = reputationSystem.getVoteCount(
+            a.questionId, answerId, IReputationSystem.ContentType.ANSWER
+        );
+        
+        return (
+            answerId,
+            a.questionId,
+            a.provider,
+            a.ipfsHash,
+            a.timestamp,
+            upvoteCount,
+            downvoteCount
+        );
     }
 
     function getQuestionAnswers(uint256 questionId) external view returns (uint256[] memory) {
@@ -466,36 +517,27 @@ contract StackExchange is Ownable {
 
     function isPoolExpired(uint256 questionId) external view returns (bool) {
         if (questionId == 0 || questionId > questionCounter) revert QuestionNotFound();
-        Question memory question = questions[questionId];
-        return question.poolAmount > 0 && block.timestamp >= question.poolEndTime;
-    }
-
-    function getQuestionDetails(uint256 questionId) external view returns (
-        address questionOwner,
-        uint256 bountyAmount,
-        uint256 poolAmount,
-        uint256 poolEndTime,
-        uint256 answerCount,
-        bool poolDistributed,
-        bool isPoolQuestion,
-        bool poolExpired
-    ) {
-        if (questionId == 0 || questionId > questionCounter) revert QuestionNotFound();
-        Question memory question = questions[questionId];
-        
-        return (
-            question.owner,
-            question.bountyAmount,
-            question.poolAmount,
-            question.poolEndTime,
-            question.answerIds.length,
-            question.poolDistributed,
-            question.poolAmount > 0,
-            question.poolAmount > 0 && block.timestamp >= question.poolEndTime
-        );
+        return questions[questionId].poolAmount > 0 && block.timestamp >= questions[questionId].poolEndTime;
     }
 
     function getUSDCBalance() external view returns (uint256) {
         return USDC.balanceOf(address(this));
+    }
+
+    function getAllQuestions() external view returns (
+        uint256[] memory questionIds,
+        string[] memory ipfsHashes
+    ) {
+        uint256 totalQuestions = questionCounter;
+        
+        questionIds = new uint256[](totalQuestions);
+        ipfsHashes = new string[](totalQuestions);
+        
+        for (uint256 i = 1; i <= totalQuestions; i++) {
+            questionIds[i - 1] = i;
+            ipfsHashes[i - 1] = questions[i].ipfsHash;
+        }
+        
+        return (questionIds, ipfsHashes);
     }
 }

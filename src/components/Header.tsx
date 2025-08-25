@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import WalletBtn from "./wallet-btn";
 import { useWallet } from "@/context/WalletContext";
 import { toast } from "sonner";
+import Link from "next/link";
 
 export default function Header() {
   return (
@@ -34,12 +35,12 @@ export default function Header() {
             >
               Bounties
             </a>
-            <a
-              href="#"
+            <Link
+              href="/temp"
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
-              Leaderboard
-            </a>
+              Temp
+            </Link>
             <Button
               size="sm"
               onClick={() =>
@@ -55,10 +56,12 @@ export default function Header() {
               <Bot className="w-4 h-4 mr-2" />
               AI Assistant
             </Button>
-            <Button size="sm">
-              <Plus className="w-4 h-4 mr-2" />
-              Ask Question
-            </Button>
+            <Link href={"/ask"}>
+              <Button size="sm">
+                <Plus className="w-4 h-4 mr-2" />
+                Ask Question
+              </Button>
+            </Link>
             <WalletBtn />
           </nav>
         </div>
