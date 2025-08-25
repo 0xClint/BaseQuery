@@ -165,6 +165,7 @@ export default function QuestionDetailPage() {
   const [loading, setLoading] = useState<boolean>(false);
   const [answerLoading, setAnswerLoading] = useState<boolean>(false);
   const [selectionLoading, setSelectionLoading] = useState<boolean>(false);
+  const [distributeLoading, setDistributeLoading] = useState<boolean>(false);
   const [voteLoading, setVoteLoading] = useState<boolean>(false);
   const {
     fetchQuestionById,
@@ -172,6 +173,7 @@ export default function QuestionDetailPage() {
     upVote,
     evmAddress,
     selectBestAnswer,
+    distributePool,
   } = useWallet();
 
   useEffect(() => {
@@ -295,11 +297,26 @@ export default function QuestionDetailPage() {
       try {
         setSelectionLoading(true);
         await selectBestAnswer(res.id, answerId);
-        toast.success("Best answer selected, bounty has been closed!");
+        toast.success("Bounty has been distributed!");
       } catch (error) {
         console.log(error);
       } finally {
         setSelectionLoading(false);
+      }
+    }
+  };
+
+  const handleDistributePool = async () => {
+    const res = data;
+    if (res?.id) {
+      try {
+        setDistributeLoading(true);
+        await distributePool(res.id);
+        toast.success("Best answer selected, bounty has been closed!");
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setDistributeLoading(false);
       }
     }
   };
@@ -537,11 +554,13 @@ export default function QuestionDetailPage() {
                     <CardTitle className="text-lg">Question Stats</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {data && data?.poolEndTime > 0 && (
-                      <Badge className="w-full py-3 bg-emerald-400 font-bold text-[15px] ">
-                        {formatEndTime(data.poolEndTime)}
-                      </Badge>
-                    )}
+                    {data &&
+                      data?.poolEndTime > 0 &&
+                      data?.poolEndTime > Math.floor(Date.now() / 1000) && (
+                        <Badge className="w-full py-3 bg-emerald-400 font-bold text-[15px] ">
+                          {formatEndTime(data.poolEndTime)}
+                        </Badge>
+                      )}
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Answers</span>
                       <span className="font-medium">
@@ -564,7 +583,8 @@ export default function QuestionDetailPage() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Status</span>
-                      {data?.isActive ? (
+                      {data?.isActive &&
+                      data?.poolEndTime > Math.floor(Date.now() / 1000) ? (
                         <Badge variant="active" className="">
                           Active
                         </Badge>
@@ -576,8 +596,14 @@ export default function QuestionDetailPage() {
                     </div>
                     {data &&
                       evmAddress.toLocaleLowerCase() ==
-                        data.owner.toLocaleLowerCase() && (
-                        <Button className="w-full bg-emerald-400 mb-2">
+                        data.owner.toLocaleLowerCase() &&
+                      data.isActive &&
+                      data?.poolEndTime < Math.floor(Date.now() / 1000) && (
+                        <Button
+                          className="w-full bg-emerald-400 mb-2"
+                          disabled={distributeLoading}
+                          onClick={handleDistributePool}
+                        >
                           Distribute Bounty
                         </Button>
                       )}

@@ -190,7 +190,6 @@ export default function QuestionsPage() {
                     </SelectItem>
                   </SelectContent>
                 </Select>
-                <ModeToggle />
               </div>
             </div>
             {questionList.length == 0 ? (

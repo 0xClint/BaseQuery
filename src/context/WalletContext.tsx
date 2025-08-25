@@ -17,6 +17,7 @@ import {
 } from "react";
 import { toast } from "sonner";
 import { encodeFunctionData } from "viem";
+import { distributePoolType } from "@/app/api/submit/distribute/route";
 
 interface WalletProviderProps {
   children: ReactNode;
@@ -150,6 +151,20 @@ const WalletProviderFn = () => {
       console.log(error);
     }
   };
+  const distributePool = async (questionId: number) => {
+    const payload: distributePoolType = {
+      questionId,
+    };
+    try {
+      const res = await fetch("/api/submit/distribute", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
   const withdrawBounty = async (questionId: number) => {
     try {
       const res = await fetch("/api/bounty/withdraw", {
@@ -208,6 +223,7 @@ const WalletProviderFn = () => {
     createQuestion,
     createAnswer,
     selectBestAnswer,
+    distributePool,
     withdrawBounty,
     questionList,
     requestFaucet,

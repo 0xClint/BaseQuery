@@ -64,7 +64,7 @@ contract BaseQuery is Ownable {
     
     uint256 public questionCounter;
     uint256 public answerCounter;
-    uint256 public constant MIN_POOL_DURATION = 1 hours;
+    uint256 public constant MIN_POOL_DURATION = 1 minutes;
     uint256 public constant MAX_POOL_DURATION = 30 days;
     uint256 public constant PLATFORM_FEE = 200; // 2%
     uint256 public platformUSDCBalance;
