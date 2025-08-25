@@ -21,7 +21,7 @@ export default [
       "@next/next/no-html-link-for-pages": "off",
       "prefer-const": "off",
       "@typescript-eslint/no-wrapper-object-types": "off",
-      "react-hooks/exhaustive-deps": "off", // Only if you're intentionally ignoring deps
+      // Only if you're intentionally ignoring deps
     },
   },
 ];
