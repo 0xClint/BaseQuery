@@ -12,12 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import {
-  ThumbsUp,
-  ThumbsDown,
-  Clock,
-  User,
-} from "lucide-react";
+import { ThumbsUp, ThumbsDown, Clock, User } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useParams } from "next/navigation";
@@ -470,11 +465,22 @@ export default function QuestionDetailPage() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Status</span>
-                      {data?.isActive &&
-                      data?.poolEndTime > Math.floor(Date.now() / 1000) ? (
-                        <Badge variant="active" className="">
-                          Active
-                        </Badge>
+                      {data?.isActive ? (
+                        data.isPoolQuestion ? (
+                          data?.poolEndTime > Math.floor(Date.now() / 1000) ? (
+                            <Badge variant="active" className="">
+                              Active
+                            </Badge>
+                          ) : (
+                            <Badge variant="neutral" className="bg-rose-500">
+                              Closed
+                            </Badge>
+                          )
+                        ) : (
+                          <Badge variant="active" className="">
+                            Active
+                          </Badge>
+                        )
                       ) : (
                         <Badge variant="neutral" className="bg-rose-500">
                           Closed

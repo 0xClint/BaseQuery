@@ -1,4 +1,5 @@
 import { AnswerFetchedItems } from "@/types/Answers.type";
+import { AllQuestionItem } from "@/types/Question.type";
 import { clsx, type ClassValue } from "clsx";
 import { createHash } from "crypto";
 import { twMerge } from "tailwind-merge";
@@ -120,5 +121,21 @@ export function sortAnswersByVotes(
 
     // Secondary: fewer downvotes first
     return a.downvotes - b.downvotes;
+  });
+}
+
+export function searchItems(
+  items: AllQuestionItem[],
+  query: string
+): AllQuestionItem[] {
+  const lowerQuery = query.toLowerCase();
+
+  return items.filter((item) => {
+    return (
+      item.title.toLowerCase().includes(lowerQuery) ||
+      item.content.toLowerCase().includes(lowerQuery) ||
+      item.tags.some((tag) => tag.toLowerCase().includes(lowerQuery)) ||
+      item.owner?.toLowerCase().includes(lowerQuery)
+    );
   });
 }

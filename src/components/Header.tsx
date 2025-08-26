@@ -2,16 +2,17 @@
 import React from "react";
 import { Button } from "./ui/button";
 import { Bot, Plus } from "lucide-react";
-import { useSession } from "next-auth/react";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+
 import WalletBtn from "./wallet-btn";
-import { useWallet } from "@/context/WalletContext";
+
 import { toast } from "sonner";
 import Link from "next/link";
 import { LogoName, LogoSymbol } from "@/assets";
 import { ModeToggle } from "./mode-toggle";
+import { usePathname } from "next/navigation";
 
 export default function Header() {
+  const pathname = usePathname();
   return (
     <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -55,7 +56,8 @@ export default function Header() {
                 Ask Question
               </Button>
             </Link>
-            <WalletBtn /> <ModeToggle />
+            {pathname === "/" && <WalletBtn />}
+            <ModeToggle />
           </nav>
         </div>
       </div>

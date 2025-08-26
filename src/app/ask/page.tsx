@@ -23,13 +23,11 @@ import {
 } from "@/components/ui/select";
 import {
   Dialog,
-
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-
 } from "@/components/ui/dialog";
 import { ArrowLeft, Plus, X, HelpCircle, Award, Calendar } from "lucide-react";
 import Link from "next/link";
@@ -118,7 +116,6 @@ export default function AskQuestionPage() {
       alert("Pool bounties require a deadline. Please select a deadline.");
       return;
     }
-
 
     try {
       setLoading(true);

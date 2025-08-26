@@ -1,11 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -28,103 +23,27 @@ import {
 import Link from "next/link";
 import { useWallet } from "@/context/WalletContext";
 import { formatUnits } from "viem";
-import { formatTimestamp } from "@/lib/utils";
+import { formatTimestamp, searchItems } from "@/lib/utils";
 import Header from "@/components/Header";
 import Loader from "@/components/Loader";
-
-// Mock data - in real app this would come from database
-const questions = [
-  {
-    id: "1",
-    title: "How to implement cross-chain token transfers using LayerZero?",
-    excerpt:
-      "Looking for best practices and security considerations when implementing cross-chain functionality...",
-    author: {
-      name: "Alex Chen",
-      avatar: "/developer-working.png",
-      reputation: 1250,
-    },
-    bounty: 50,
-    answers: 5,
-    views: 1247,
-    createdAt: "2 hours ago",
-    tags: ["solidity", "cross-chain", "layerzero", "defi"],
-    hasAcceptedAnswer: true,
-  },
-  {
-    id: "2",
-    title:
-      "What are the gas optimization techniques for NFT minting contracts?",
-    excerpt:
-      "Need help reducing gas costs for a large-scale NFT collection launch...",
-    author: {
-      name: "Maria Santos",
-      avatar: "/nft-developer.png",
-      reputation: 890,
-    },
-    bounty: 75,
-    answers: 12,
-    views: 2341,
-    createdAt: "4 hours ago",
-    tags: ["nft", "gas-optimization", "ethereum", "solidity"],
-    hasAcceptedAnswer: false,
-  },
-  {
-    id: "3",
-    title: "Best practices for DeFi protocol security audits?",
-    excerpt:
-      "What should I look for when reviewing smart contracts before deployment...",
-    author: {
-      name: "David Kim",
-      avatar: "/security-expert.png",
-      reputation: 2100,
-    },
-    bounty: 100,
-    answers: 8,
-    views: 1876,
-    createdAt: "6 hours ago",
-    tags: ["defi", "security", "audit", "smart-contracts"],
-    hasAcceptedAnswer: false,
-  },
-  {
-    id: "4",
-    title: "How to handle MEV protection in AMM pools?",
-    excerpt:
-      "Looking for strategies to protect users from MEV attacks in my DEX implementation...",
-    author: {
-      name: "Lisa Wang",
-      avatar: "/defi-developer.png",
-      reputation: 1650,
-    },
-    bounty: 0,
-    answers: 3,
-    views: 567,
-    createdAt: "8 hours ago",
-    tags: ["mev", "amm", "defi", "ethereum"],
-    hasAcceptedAnswer: false,
-  },
-  {
-    id: "5",
-    title: "Integrating Chainlink oracles with custom price feeds?",
-    excerpt:
-      "Need guidance on implementing custom oracle solutions for exotic asset pairs...",
-    author: {
-      name: "Tom Johnson",
-      avatar: "/oracle-developer.png",
-      reputation: 1420,
-    },
-    bounty: 25,
-    answers: 6,
-    views: 934,
-    createdAt: "12 hours ago",
-    tags: ["chainlink", "oracles", "price-feeds", "defi"],
-    hasAcceptedAnswer: true,
-  },
-];
+import { ChangeEvent, useEffect, useMemo, useState } from "react";
+import { AllQuestionItem } from "@/types/Question.type";
 
 export default function QuestionsPage() {
   const { questionList } = useWallet();
 
+  const [questionData, setQuestionData] =
+    useState<AllQuestionItem[]>(questionList);
+
+  useEffect(() => {
+    setQuestionData(questionList);
+  }, [questionList]);
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const newQuestionList = searchItems(questionList, value);
+    setQuestionData(newQuestionList);
+  };
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -150,7 +69,11 @@ export default function QuestionsPage() {
               <div className="flex gap-4">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                  <Input placeholder="Search questions..." className="pl-10" />
+                  <Input
+                    placeholder="Search questions..."
+                    className="pl-10"
+                    onChange={handleChange}
+                  />
                 </div>
                 <Button>
                   <Filter className="w-4 h-4 mr-2" />
@@ -189,13 +112,13 @@ export default function QuestionsPage() {
                 </Select>
               </div>
             </div>
-            {questionList.length == 0 ? (
+            {questionData.length == 0 ? (
               <Loader />
             ) : (
               <>
                 {/* Questions List */}
                 <div className="space-y-4">
-                  {questionList.map(
+                  {questionData.map(
                     ({
                       id,
                       title,

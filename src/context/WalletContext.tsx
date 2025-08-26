@@ -64,6 +64,22 @@ const WalletProviderFn = () => {
       }
     }
   };
+
+  const fetchQuestions = useCallback(async () => {
+    try {
+      const res = await fetch("/api/questions");
+      if (!res.ok) throw new Error(`Failed to fetch questions: ${res.status}`);
+
+      const { questions } = (await res.json()) as {
+        questions: AllQuestionItem[];
+      };
+      console.log(questions);
+      setQuestionList(questions);
+    } catch (error) {
+      console.error("Error fetching questions:", error);
+      // setQuestionList([]);
+    }
+  }, []);
   useEffect(() => {
     if (status === "authenticated") {
       fetchEvmAddress();
@@ -75,6 +91,12 @@ const WalletProviderFn = () => {
       refreshBalance();
     }
   }, [evmAddress, refreshBalance]);
+
+  useEffect(() => {
+    if (evmAddress) {
+      fetchQuestions();
+    }
+  }, [evmAddress, fetchQuestions]);
 
   const createQuestion = async (
     questionData: QuestionItem,
@@ -94,6 +116,7 @@ const WalletProviderFn = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+      await fetchQuestions();
     } catch (error) {
       console.log(error);
     }
@@ -177,22 +200,6 @@ const WalletProviderFn = () => {
     }
   };
 
-  const fetchQuestions = useCallback(async () => {
-    try {
-      const res = await fetch("/api/questions");
-      if (!res.ok) throw new Error(`Failed to fetch questions: ${res.status}`);
-
-      const { questions } = (await res.json()) as {
-        questions: AllQuestionItem[];
-      };
-      console.log(questions);
-      setQuestionList(questions);
-    } catch (error) {
-      console.error("Error fetching questions:", error);
-      // setQuestionList([]);
-    }
-  }, []);
-
   const fetchQuestionById = async (id: number) => {
     const payload: { paramsId: number } = {
       paramsId: id,
@@ -215,28 +222,7 @@ const WalletProviderFn = () => {
       console.error("Error fetching question:", error);
       return null;
     }
-
-    // try {
-    //   const res = await fetch(`/api/questions/${id}`);
-    //   if (!res.ok) throw new Error(`Failed: ${res.status}`);
-
-    //   const { question } = (await res.json()) as {
-    //     question: QuestionFetchedItems;
-    //   };
-
-    //   console.log("Fetched question:", question);
-    //   return question;
-    // } catch (error) {
-    //   console.error("Error fetching question:", error);
-    //   return null;
-    // }
   };
-
-  useEffect(() => {
-    if (evmAddress) {
-      fetchQuestions();
-    }
-  }, [evmAddress, fetchQuestions]);
 
   return {
     evmAddress,
