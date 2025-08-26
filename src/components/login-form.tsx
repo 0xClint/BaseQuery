@@ -24,7 +24,7 @@ export function LoginForm({
     try {
       setIsSigning(true);
       setSignInProvider(provider);
-      await signIn(provider, { callbackUrl: "/" });
+      await signIn(provider, { callbackUrl: "/questions" });
     } catch (err) {
       console.error(`${provider} login failed:`, err);
     } finally {

@@ -39,6 +39,7 @@ import { useWallet } from "@/context/WalletContext";
 import { QuestionItem } from "@/types/Question.type";
 import { toast } from "sonner";
 import Loader from "@/components/Loader";
+import Header from "@/components/Header";
 
 const questionFormSchema = z.object({
   title: z
@@ -175,28 +176,7 @@ export default function AskQuestionPage() {
         </form>
       </Dialog>
       {/* Header */}
-      <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-4">
-              <Link href="/">
-                <Button size="sm">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Home
-                </Button>
-              </Link>
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                  <span className="text-primary-foreground font-bold text-lg">
-                    C
-                  </span>
-                </div>
-                <h1 className="text-xl font-bold text-foreground">BaseQuery</h1>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">

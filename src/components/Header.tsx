@@ -21,41 +21,24 @@ export default function Header() {
             <Link href={"/"}>
               <img src={LogoName.src} alt="BaseQuery" className="h-10" />
             </Link>{" "}
-            <Link
-              href="/questions"
-              className="text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Questions
-            </Link>
           </div>
           <nav className="hidden md:flex items-center gap-6">
-            {/* <Link
-              href="/temp"
-              className="text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Temp
-            </Link> */}
-            <Button
-              size="sm"
-              onClick={() =>
-                toast("Event has been created", {
-                  description: "Sunday, December 03, 2023 at 9:00 AM",
-                  action: {
-                    label: "Undo",
-                    onClick: () => console.log("Undo"),
-                  },
-                })
-              }
-            >
+            <Button size="sm">
               <Bot className="w-4 h-4 mr-2" />
               AI Assistant
             </Button>
-            <Link href={"/ask"}>
-              <Button size="sm">
-                <Plus className="w-4 h-4 mr-2" />
-                Ask Question
-              </Button>
-            </Link>
+            {pathname == "/ask" ? (
+              <Link href={"/questions"}>
+                <Button size="sm">All Questions</Button>
+              </Link>
+            ) : (
+              <Link href={"/ask"}>
+                <Button size="sm">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Ask Question
+                </Button>
+              </Link>
+            )}
             {pathname !== "/" && <WalletBtn />}
             <ModeToggle />
           </nav>

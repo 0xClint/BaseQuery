@@ -70,8 +70,8 @@ export async function GET() {
         );
       }
     }
-
-    return NextResponse.json({ questions });
+    const sorted = [...questions].sort((a, b) => b.createdAt - a.createdAt);
+    return NextResponse.json({ questions: sorted });
   } catch (error) {
     console.error("Error fetching questions:", error);
     return NextResponse.json(
