@@ -2,6 +2,10 @@
 
 # Base Query – Decentralized Q\&A Platform 
 
+Demo : https://base-query.vercel.app
+
+Walkthrough : https://youtu.be/I-i8oMY3L5Q
+
 **Base Query** is a decentralized Q\&A platform frontend built using **Next.js**, integrated with smart contracts on the **Base blockchain**. It enables developers to ask and answer technical questions with **USDC-based incentives**, leveraging on-chain reputation and governance.
 
 This repository contains the web interface for interacting with the Base Query smart contracts.
