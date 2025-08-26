@@ -10,6 +10,7 @@ import Star1 from "./stars/Star1";
 import Star2 from "./stars/Star2";
 import Star3 from "./stars/Star3";
 import Star4 from "./stars/Star4";
+import { LogoName } from "@/assets";
 // import { Logowhite1 } from "@/assets";
 
 export function LoginForm({
@@ -80,8 +81,8 @@ export function LoginForm({
               href="#"
               className="flex flex-col items-center gap-2 font-medium"
             >
-              <div className="flex items-center size-36 justify-center rounded-md">
-                {/* <img src={Logowhite1.src} /> */}
+              <div className=" h-16 my-10">
+                <img src={LogoName.src} />
               </div>
               <span className="sr-only">Supportly</span>
             </a>

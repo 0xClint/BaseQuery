@@ -45,6 +45,7 @@ export default function QuestionDetailPage() {
   const [answerLoading, setAnswerLoading] = useState<boolean>(false);
   const [selectionLoading, setSelectionLoading] = useState<boolean>(false);
   const [distributeLoading, setDistributeLoading] = useState<boolean>(false);
+  const [withdrawLoading, setWithdrawLoading] = useState<boolean>(false);
   const [voteLoading, setVoteLoading] = useState<boolean>(false);
   const {
     fetchQuestionById,
@@ -53,6 +54,7 @@ export default function QuestionDetailPage() {
     evmAddress,
     selectBestAnswer,
     distributePool,
+    withdrawBounty,
   } = useWallet();
 
   useEffect(() => {
@@ -191,6 +193,21 @@ export default function QuestionDetailPage() {
         console.log(error);
       } finally {
         setDistributeLoading(false);
+      }
+    }
+  };
+
+  const handleWithDraw = async () => {
+    const res = data;
+    if (res?.id) {
+      try {
+        setWithdrawLoading(true);
+        await withdrawBounty(res.id);
+        toast.success("Bounty has been withdrawn!");
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setWithdrawLoading(false);
       }
     }
   };
@@ -444,6 +461,12 @@ export default function QuestionDetailPage() {
                         </Badge>
                       )}
                     <div className="flex justify-between">
+                      <span className="text-muted-foreground">Bounty type</span>
+                      <span className="font-medium">
+                        {data?.isPoolQuestion ? "Pool" : "Solo"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
                       <span className="text-muted-foreground">Answers</span>
                       <span className="font-medium">
                         {data?.answers.length}
@@ -492,13 +515,27 @@ export default function QuestionDetailPage() {
                       evmAddress.toLocaleLowerCase() ==
                         data.owner.toLocaleLowerCase() &&
                       data.isActive &&
-                      data?.poolEndTime < Math.floor(Date.now() / 1000) && (
+                      data?.poolEndTime < Math.floor(Date.now() / 1000) &&
+                      data.answers.length > 0 && (
                         <Button
                           className="w-full bg-emerald-400 mb-2"
                           disabled={distributeLoading}
                           onClick={handleDistributePool}
                         >
                           Distribute Bounty
+                        </Button>
+                      )}
+                    {data?.answers.length == 0 &&
+                      !data.isPoolQuestion &&
+                      evmAddress.toLocaleLowerCase() ==
+                        data.owner.toLocaleLowerCase() &&
+                      data.bountyAmount > 0 && (
+                        <Button
+                          className="w-full bg-emerald-400 mb-2"
+                          disabled={withdrawLoading}
+                          onClick={handleWithDraw}
+                        >
+                          Withdraw Bounty
                         </Button>
                       )}
                   </CardContent>

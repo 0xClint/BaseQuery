@@ -56,7 +56,7 @@ export default function Header() {
                 Ask Question
               </Button>
             </Link>
-            {pathname === "/" && <WalletBtn />}
+            {pathname !== "/" && <WalletBtn />}
             <ModeToggle />
           </nav>
         </div>

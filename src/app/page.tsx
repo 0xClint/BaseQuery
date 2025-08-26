@@ -52,8 +52,8 @@ export default function Home() {
             Get Answers, Earn Rewards
           </h2>
           <p className="text-xl text-muted-foreground mb-8">
-            The Web3 community-driven Q&A platform where knowledge meets bounty
-            rewards
+            The Web3 community-driven Q&A platform with USDC rewards, reputation and CDP
+            Wallet
           </p>
 
           {/* Search Bar */}
